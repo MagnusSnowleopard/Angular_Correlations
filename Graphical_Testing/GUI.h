@@ -1,7 +1,7 @@
 #include "global.h"
 
 //To compile : g++ AD.cxx -o {Input Executable Name} -lX11
-// VERSION : 1.1 (Overlay for Angular Fit Display) 
+// VERSION : 1.0
 // Created with thanks to Daniel Folds Holt - University of Cambridge Cavendish Lab
 
 
@@ -90,6 +90,7 @@ int HistoGUI::SetData(std::vector<double> a, std::vector<double>b){
 		x.push_back(a[i]);
 		y.push_back(b[i]);
 	}
+
 	return a.size();
 }
 
@@ -210,7 +211,7 @@ double HistoGUI::legval(double theta){
 	double lg;
 	
 	double	aaa = A0; 
-	double 	aab  = A2E*(1.5 * pow(theta,2) - 1);
+	double 	aab  = A2E*(1.5 * pow(theta,2) - .5);
     double  aac  = A4E*(35./8. * pow(theta,4) - 30./8. * pow(theta,2)  +  3./8. );
 	
 	lg = aaa + aab + aac;
@@ -347,6 +348,7 @@ int HistoGUI::DrawData(double x_low_win, double y_low_win, double x_hi_win, doub
 		height_scale = -1. * (max_y - min_y) / (0.8 * height);
 		y_offset = -0.5 * ((max_y - min_y) / 0.8) + -0.5 * (min_y + max_y);
 
+
 		//printf("width scale  = %f\n", width_scale);
 		//printf("x_offset     = %f\n", x_offset);
 		//printf("height scale = %f\n", height_scale);
@@ -354,10 +356,15 @@ int HistoGUI::DrawData(double x_low_win, double y_low_win, double x_hi_win, doub
 		double axis_x  = (0. + x_offset) / width_scale;
 		double axis_y  = (0. + y_offset) / height_scale;
 
+		//cout << "x-axis = %lf\n" <<axis_x;
+		//cout << "y-axis = %lf\n" <<axis_y;
+
 		XSetForeground(disp, DefaultGC(disp,screen), xcolour.pixel);
 		XDrawLine(disp, wind, DefaultGC(disp, screen), axis_x, 0.0, axis_x, height);
-		XDrawLine(disp, wind, DefaultGC(disp, screen), 0.0, axis_y, width, axis_y);
+	    XDrawLine(disp, wind, DefaultGC(disp, screen), 0.0, axis_y, width, axis_y);
 
+		//XDrawLine(disp, wind, DefaultGC(disp, screen), 500, 0.0, 500, 600);
+		//XDrawLine(disp, wind, DefaultGC(disp, screen), 0.0, 400, 700, 400);
 		char axis_val[4];
 		int w_step = width / 10;
 		for(int i=0; i < (int) width; i += w_step){

@@ -1,18 +1,9 @@
-#include <X11/Xlib.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vector>
-#include <cmath> 
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <algorithm>
+#include "global.h"
 
-#include "GUI.h"
-#include "Coeff.h"
+//#include "GUI.h"
+#include "GUI_Base.h"
+#include "Functlib.h"
 #include "QDK.h"
-#include "Racah.h"
 #include "Cleb.h"
 
 
@@ -20,40 +11,12 @@
 //For more information about angular distributions, read Rose and Brinks, and Frank Moore (1988). 
 
 using namespace std;
-void menu(){
-
-	std::cout <<"==========================================\n";
-	std::cout<< "\t\t Menu Options \t \n";
-	std::cout<< "0 - Reading and Instructions \n"; 
-	std::cout<< "1 - Plot Chi Sqr \n";
-	std::cout<< "2 - Plot Ang.Dis Fit \n"; 
-	std::cout<< "3 - Clear J1 J2 Memory \n";
-	std::cout<< "4 - Exit \n";
-	std::cout<< "5 - Legfit to Data \n"; 
-	std::cout<< "6 - Generate Data \n"; 
-	std::cout<<"=========================================== \n";} 
-void Readme(){
-	std::cout<< " The program calculates Chi-Squared values \n";
-	std::cout<< " from experimental angular distributions as \n";
-	std::cout<< " a function of multipole ratios using the \n"; 
-	std::cout<< " theoretical angular distribution formulae \n"; 
-	std::cout<< " in rose and brink \n";
-	std::cout<< " \n"; 
-	std::cout<< " Follow the prompt in order to correctly display \n";
-	std::cout<< " \n";
-	std::cout<< " To close the gui, press any button. \n";
-	std::cout<< " To zoom in, left click then drag and let go. To unzoom\n";
-	std::cout<< " press the space bar. To draw, right click\n";
-	std::cout<< "                                          \n";
-	std::cout<< " ad.txt is generated with geometric stats.\n";
-	std::cout<< " Then at the end it generates CG, W3J & W6J\n";
-	
-}
 #ifndef __CINT__ 
 
 int main(int argc,char **argv){
+
 	HistoGUI gui;
-	//	menu();
+	
 	double j1, j2;
 
 
@@ -61,8 +24,7 @@ int main(int argc,char **argv){
 	double detradius, targetdistance, detthickness = -1;
 	double Energy;
 	//input .csv file
-	double Sigma; 	
-	double Feeding; 
+	double Sigma; 	 
 
 //--------------------------------
 
@@ -71,8 +33,8 @@ int main(int argc,char **argv){
 	detthickness = 5.;
 	
 	Energy = 1062.;
-	Sigma = .1; 
-	Feeding = .1;
+	Sigma = 0.; 
+	
 
 	j1 = 2.; 
 	j2 = 1.;
@@ -86,7 +48,7 @@ int main(int argc,char **argv){
 	int gamma_energy_token = -1;
 	int ang_file_token = -1; 
 	int sigma_token = -1; 
-	int feeding_token = -1;
+	
 	int j1j2token = -1; 
  if(test == 1){
 
@@ -94,11 +56,11 @@ int main(int argc,char **argv){
 	 gamma_energy_token = 1;
 	 ang_file_token = -1; 
 	 sigma_token = 1; 
-	 feeding_token = 1;
+	 
 	 j1j2token = 1; 
 
 }
-/*
+if( test == 0 ) {
 	printf("Input detector radius, target distance, and detector thickness : ");
 	scanf("%lf,%lf,%lf",&detradius,&targetdistance,&detthickness);
 
@@ -132,17 +94,18 @@ int main(int argc,char **argv){
 
 	if(Energy > 0){
 		gamma_energy_token = 1; printf(" --- Gamma Energy loaded --- \n");
-	}*/
+	}
 
-	QKN(Energy, detradius, targetdistance, detthickness);
 	//then calucate QD2 and QD4, and replace the 0 with them. 
-	double QD2 = .7;
-	double QD4 = .3;
+}
 
-	//input data file of Angular Data (theta, Yexp, Yerr)
-	string fname;
-	cout<<"Enter the file name : ";
-	cin>>fname;
+	double QD2 =  QK2(Energy, detradius, targetdistance, detthickness); ;
+		//.82;//NEED TO READ FROM ad.txt in the future. 
+	double QD4 =  QK4(Energy, detradius, targetdistance, detthickness); ;
+		//.44;
+//	cout << "QD2 = " << " " << QD2 << "  QD4 = " << " " << QD4 << "\n";
+
+//input data file of Angular Data (theta, Yexp, Yerr)
 
 	vector<vector<string> > content;
 	vector<string> row;
@@ -152,24 +115,66 @@ int main(int argc,char **argv){
 	vector<string> ydata;
 	vector<string> eydata; 
 	int num = 0;
+	string fname,fname2;
+	cout<<"Enter the file name : ";
+	cin>>fname;
+ 
+	int aaaa = -1;
 	fstream file(fname.c_str());
-	if(file.is_open()){
-		while(getline(file,line)){
-			row.clear();
-	
-			stringstream str(line);
 
-			while(getline(str, word, ','))
-			
-				row.push_back(word);
-				content.push_back(row);
-				adata.push_back(row[0]);
-				ydata.push_back(row[1]);
-				eydata.push_back(row[2]);			
-				 
-		}
-		cout<< " --- Angular Data File Loaded --- \n";
-	}else cout<< "Could not open the file\n";
+	if(file.is_open()){
+			cout<< " --- Angular Data File Loaded --- \n";
+			ang_file_token = 1;
+			while(getline(file,line)){
+
+					row.clear();
+
+					stringstream str(line);
+
+					while(getline(str, word, ','))
+
+							row.push_back(word);
+					content.push_back(row);
+					adata.push_back(row[0]);
+					ydata.push_back(row[1]);
+					eydata.push_back(row[2]);			
+
+			}
+	}else{
+			do{
+					cout<< "Could not open the file\n";
+					cout<< "Enter the file name : ";
+					cin>>fname2;
+
+					fstream file(fname2.c_str());
+
+					if(file.is_open()){
+							aaaa = 1;
+
+							while(getline(file,line)){
+
+									row.clear();
+
+									stringstream str(line);
+
+									while(getline(str, word, ','))
+
+											row.push_back(word);
+									content.push_back(row);
+									adata.push_back(row[0]);
+									ydata.push_back(row[1]);
+									eydata.push_back(row[2]);			
+
+							}
+
+					}else{ aaaa = -1; }
+
+			}while(aaaa == -1);
+
+			cout<< " --- Angular Data File Loaded --- \n";
+			ang_file_token = 1;
+
+	}
 	
 	for(int i = 0; i< adata.size();i++){
 //		cout << adata[i] << "\n";
@@ -177,50 +182,25 @@ int main(int argc,char **argv){
 //		cout << eydata[i] << "\n";
 	}
 	
-	// Legendre Polinomial fit using adata, ydata, eydata;
+// Legendre Polinomial fit using adata, ydata, eydata;
 
-	vector<int> int_adata(adata.size());
-std::transform(adata.begin()+1, adata.end(), std::back_inserter(int_adata), StrToInt);
+	adata.erase(adata.begin());
+	ydata.erase(ydata.begin());
+	eydata.erase(eydata.begin());
 
-	vector<double> double_angle(int_adata.size() -4);
-	for(int i = 4; i<  int_adata.size(); i++){
-	//	printf("angle = %d\n",int_adata[i]);
-		double_angle.push_back((double)int_adata[i]*3.14159/180);	
-	}
-
-	vector<int> int_ydata(ydata.size());
-std::transform(ydata.begin()+1, ydata.end(), std::back_inserter(int_ydata), StrToInt);
-
-	for(int i = 4; i<  int_ydata.size(); i++){
-	//	printf("Ydata = %d\n",int_ydata[i]);
-	}
-
-	vector<double> double_ydata(int_ydata.size() -4);
-	for(int i = 4; i<  int_ydata.size(); i++){
-	//	printf("angle = %d\n",int_adata[i]);
-		double_ydata.push_back((double)int_ydata[i]);	
-
-	}
+	vector<double> dangle = string_to_double_vector(adata);
+	vector<double> dydata = string_to_double_vector(ydata);
+	vector<double> deydata = string_to_double_vector(eydata);
 	
-	vector<int> int_eydata(eydata.size());
-std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), StrToInt);
+	vector<double> dangler;
 
-	for(int i = 4; i<  int_eydata.size(); i++){
-	//	printf("Error data = %d\n",int_eydata[i]);
+	for(int i = 0; i < dangle.size(); i++){
+		double aa = dangle[i]; 
+		
+		dangler.push_back(aa*3.14159/180.);
+		printf("dangle = %lf\n",dangler[i]);
 	}
 
-	
-	for(int i = 3; i< double_angle.size();i++){
-	//	printf("rad angle = %lf\n",double_angle[i]);
-	
-		//displays the angles inputed as doubles in radians. 
-	}
-	
-	for(int i = 3; i< double_ydata.size();i++){
-	//	printf("y_data = %lf\n",double_ydata[i]);
-	
-		//displays the angles inputed as doubles in radians. 
-	}
 	/*
 	for(int i=0; i<content.size(); i++){
 		for(int j=0; j<content[i].size(); j++){
@@ -244,23 +224,23 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	
 	double a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12 = 0.;
 	
-	for(int i = 3; i< double_angle.size(); i++){
+	for(int i = 0; i< dangler.size(); i++){
 		
 //eq1
 		a1 += 1; //how many data points, not intensional but convientient.  
-		a2 += (1.5 * pow(double_angle[i],2) - 1);
-		a3 += (35./8. * pow(double_angle[i],4) - 30./8. * pow(double_angle[i],2)  +  3./8. );
-		a4 += double_ydata[i]; 
+		a2 += (1.5 * pow(dangler[i],2) - .5);
+		a3 += (35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
+		a4 += dydata[i]; 
 //eq2 
-		a5 += (1.5 * pow(double_angle[i],2) - 1);
-		a6 += (1.5 * pow(double_angle[i],2) - 1)*(1.5 * pow(double_angle[i],2) - 1);
-		a7 += (1.5 * pow(double_angle[i],2) - 1)*(35./8. * pow(double_angle[i],4) - 30./8. * pow(double_angle[i],2)  +  3./8. );
-		a8 += (1.5 * pow(double_angle[i],2) - 1)*double_ydata[i];
+		a5 += (1.5 * pow(dangler[i],2) - .5);
+		a6 += (1.5 * pow(dangler[i],2) - .5)*(1.5 * pow(dangler[i],2) - .5);
+		a7 += (1.5 * pow(dangler[i],2) - .5)*(35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
+		a8 += (1.5 * pow(dangler[i],2) - .5)*dydata[i];
 //eq4
-		a9 += (35./8. * pow(double_angle[i],4) - 30./8. * pow(double_angle[i],2)  +  3./8. );
-		a10 += (1.5 * pow(double_angle[i],2) - 1)*(35./8. * pow(double_angle[i],4) - 30./8. * pow(double_angle[i],2)  +  3./8. );
-		a11 +=(35./8. * pow(double_angle[i],4) - 30./8. * pow(double_angle[i],2)  +  3./8. )* (35./8. * pow(double_angle[i],4) - 30./8. * pow(double_angle[i],2)  +  3./8. );
-		a12 += (35./8. * pow(double_angle[i],4) - 30./8. * pow(double_angle[i],2)  +  3./8. )*double_ydata[i];
+		a9 += (35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
+		a10 += (1.5 * pow(dangler[i],2) - .5)*(35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
+		a11 +=(35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. )* (35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
+		a12 += (35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. )*dydata[i];
 
 		 
 	}
@@ -336,7 +316,7 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	
 
 
-	/*
+if(test == 0){	
 
 	printf("Please enter sigma, sigma = 0 for perfect allignment : ");
 	scanf("%lf", &Sigma);
@@ -352,21 +332,7 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	if(Sigma >= 0 ){
 		sigma_token = 1; printf(" --- Sigma Loaded --- \n"); 
 	}
-
-	printf("Please enter feeding parameter : ");
-	scanf("%lf", &Feeding);	
-	if(Feeding >= 0 and Feeding < 1){
-		feeding_token = 1;
-	}else{
-		do{
-			printf("Negative numbers are not allowed!\nRe-enter Feeding : ");
-			scanf("%lf", &Feeding);
-		}while(Feeding < 0);}
-
-	if(Feeding >= 0 ){
-		feeding_token = 1; printf(" --- Feeding Loaded --- \n");
-	}
-
+	
 	printf("Please enter J1,J2 : ");
 	scanf("%lf,%lf",&j1,&j2);	
 	if(j1 >= 0 && j2  >= 0 ){
@@ -380,32 +346,12 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	if(j1 >= 0 && j2  >= 0 ){
 		j1j2token = 1; printf(" --- J1 & J2 Loaded --- \n");
 	}
-*/
-	
 
-	/*
-	   printf("detector radius = %lf\n",detradius);
-	   printf("detector distance = %lf\n",targetdistance);
-	   printf("detector width = %lf\n",detthickness);
+}
 
-	   printf("Gamma-Ray energy = %lf\n", Energy);
-	   printf("Sigma Distribution = %lf\n", Sigma); 
-	   printf("Feeding param = %lf\n", Feeding); 
-	   printf("J1,J2 = %lf,%lf\n",j1,j2);
-	   */
-/*	
-	double J  = j1 + j2;
-	double m1 = j1;
-	double m2 = j2;
-	double M  = m1 + m2; 
-	double j3 = J; 
-	double m3 = j3;	
-	double j4 = j3;
-	double j5 = j1 + j2 + j3;
-	double j6 = j2 + j3; 
-*/
 // Calculate BK(j1) for perfect allignment
 //
+	
 	double A[6];
 	double js = sqrt(2*j1 +1); 
 	double j12 = 2*j1;
@@ -413,10 +359,11 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	
 	double cg12,cg22,cg24,cg14 = 0.;
 	double I1, I2 = 0.;
-	double Bk11, Bk12 = 0.;
 	
 	double cg1, cg2 = 0.;	
 	
+	double Bk11, Bk12 = 0.;
+	if(Sigma == 0){
 	if(IS == 1){
 		A[0] = j1;
 		A[1] = j1;
@@ -441,6 +388,15 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 
 		cg14 = CG2(A);
 
+
+		printf("cg12 = %lf\n",cg12);
+		printf("cg22 = %lf\n",cg22);
+		printf("cg24 = %lf\n",cg24);
+		printf("cg24 = %lf\n",cg24);
+
+		printf("Bk11 = %lf\n",Bk11);	
+		printf("Bk12 = %lf\n",Bk12);	
+	
 		Bk11 = (0.5)*js*(pow(-1,I1) * cg12 + pow(-1,I2) * cg22);
 		Bk12 = (0.5)*js*(pow(-1,I1) * cg14 + pow(-1,I2) * cg24);
 	}else if(IS == 0){
@@ -451,8 +407,8 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 		A[4] = 0.;
 		A[5] = 0.; 
 		
-		cg1 = CG2(A);
-	
+		cg1 = CG2(A);	
+
 		Bk11 = pow(-1,j1) * js * cg1;
 
 		A[2] = 4.;
@@ -460,19 +416,23 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 		cg2 = CG2(A);
 		Bk12 = pow(-1,j1) * js * cg2; 	
 		
+		printf("Bk11 = %lf\n",Bk11);	
+		printf("Bk12 = %lf\n",Bk12);	
+		printf("cg1 = %lf\n",cg1);
+		printf("cg2 = %lf\n",cg2);
 	}
-
+	}
 //normalize W(m1) 
 //
 
-	       j12 = 2*j1;
+		   j12 = 2*j1;
 	double j14 = 4*j1;
 	
 	double sigsq = pow(Sigma,2);
 	double sum1 = 0.; 
 
 	double am1,amsq,x,ex = 0.;
-
+//-------------------------------------------------------SOMETHING WRONG WITH CN1.
 	for(int i = 0; i <= j14; i = i + 2){
 		am1 = 0.5*(i - j12);
 		amsq = pow(am1,2);
@@ -482,6 +442,8 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 		sum1 = sum1 + ex;
 	}
 	double cn1 = 1./sum1;	
+
+//	cout << "cn1"  << " " << cn1 << "\n"; 
 
 	double AL0 = 0.;
 	double A0 = j1 - j2; 
@@ -495,102 +457,130 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	double am11,amsq1,x1,ex1 = 0.;
 //calculate Bk(j1) for gaussian W(m1) or non zero Sigma
 
-	A[0] = j1; 
-	A[1] = j1; 
+//NEEDS VALUE FIX
+	  if(Sigma != 0){
+			double A[6];
+			A[0] = j1; 
+			A[1] = j1; 
+
+			double sfact = sqrt(2*j1 +1); 
+			double cgg = 0.; 
+			double tTerm = 0.; 
+			double II = 0.;
+			for(int i = 2; i<= 4; i = i + 2){
+
+				A[2] = i; 
+				Bk11 = 0.;
+				Bk12 = 0.; 
+					for(int m = 0; m <= j14; m = m +2){
+							am11 = 0.5*(m - j12);
+							amsq1 = pow(am11,2);
+							x1 = -(amsq/(2*sigsq));
+							II = j1 - am11; 
+							A[3] = am11; 
+							A[4] = -am11; 
+							A[5] = 0; 
+							cgg = CG2(A);
+	//						cout << "cgg = " << "  " << cgg << "\n";
+	//						cout << "am11 = " << "  " << am11 << "\n";
+	//						cout << "amsq1 = " << "  " << amsq1 << "\n";
+	//						cout << "x1 = " << "  " << x1 << "\n";
+
+							ex1 = exp(x1);
+							tTerm = cn1*ex1*pow(-1,II) * sfact*cgg;
+							
+	//						cout <<"tTerm "<<"  " << tTerm << "\n";
+
+							if(i == 2) Bk11 = Bk11 + tTerm;
+							if(i == 4) Bk12 = Bk12 + tTerm; 
+					}
+			}
+		cout << "Bk11" << " " << Bk11 << "\n";
+		cout << "Bk12" << " " << Bk12 << "\n";
 	
-	double sfact = sqrt(2*j1 +1); 
-	double cgg = 0.; 
-	double tTerm = 0.; 
-	double II = 0.;
-	for(int i = 2; i<= 4; i = i + 2){
+
+	}
+	
+	vector<vector<string> > content_r;
+	vector<string> row_r;
+	string line_r, word_r; 
+	
+	vector<string> j1data;
+	vector<string> j2data;
+	vector<string> Rk20data; 
+	vector<string> Rk21data; 
+	vector<string> Rk22data; 
+	vector<string> Rk40data; 
+	vector<string> Rk41data; 
+	vector<string> Rk42data; 
 		
-		A[2] = i; 
-		Bk11 = 0.;
-		Bk12 = 0.; 
-		for(int m = 0; m <= j14; m = m +2){
-			am11 = 0.5*(m - j12);
-			amsq1 = pow(am11,2);
-			x1 = -(amsq/(2*sigsq));
-			II = j1 - am11; 
-			A[3] = am11; 
-			A[4] = -am11; 
-			cgg = CG2(A);
-			ex1 = exp(x1);
-			tTerm = cn1*ex1*pow(-1,II) * sfact*cgg;
-			if(i == 2) Bk11 = Bk11 * tTerm;
-			if(i == 4) Bk12 = Bk12 * tTerm; 
+
+	fstream file1("RkTable.csv");
+	if(file1.is_open()){
+		while(getline(file1,line_r)){
+			row_r.clear();
+	
+			stringstream str(line_r);
+
+			while(getline(str, word_r, ','))
+			
+				row_r.push_back(word_r);
+				content_r.push_back(row_r);
+				j1data.push_back(row_r[0]);
+				j2data.push_back(row_r[1]);
+				Rk20data.push_back(row_r[2]);			
+				Rk21data.push_back(row_r[3]);			
+				Rk22data.push_back(row_r[4]);			
+				Rk40data.push_back(row_r[5]);			
+				Rk41data.push_back(row_r[6]);			
+				Rk42data.push_back(row_r[7]);			
+				 
+		}
+		cout<< " --- Rk(llj1j2) Table Loaded --- \n";
+	}else cout<< "Could not open the file\n";
+	
+	vector<double>::iterator dit;
+	vector<double>::iterator dit2;
+
+	vector<double> j1datad   = string_to_double_vector(j1data);
+	vector<double> j2datad   = string_to_double_vector(j2data);
+	vector<double> rk20datad = string_to_double_vector(Rk20data);
+	vector<double> rk21datad = string_to_double_vector(Rk21data);
+	vector<double> rk22datad = string_to_double_vector(Rk22data);
+	vector<double> rk40datad = string_to_double_vector(Rk40data);
+	vector<double> rk41datad = string_to_double_vector(Rk41data);
+	vector<double> rk42datad = string_to_double_vector(Rk42data);
+
+	int nn = 0;
+	for(dit = j1datad.begin();dit < j1datad.end();dit++){
+		
+		if(j1 == *dit){
+
+			for(dit2 = j2datad.begin();dit2 < j2datad.end();dit2++){
+			
+				if(j2 == *dit2 and j1 == j1datad[distance(j2datad.begin(),dit2)]){
+		//			cout << *dit << " " << *dit2 << " Index Equals =  " <<distance(j2datad.begin(),dit2) << "\n";
+					nn = distance(j2datad.begin(),dit2);
+				}
+			}
 		}
 	}
 	
-
-//need to add correction of statistical tensors for cascade feeding. 
-//
-//
-
-
-//Calculate Rk(LL,j1j2)
-//
-	double B[6];
+//		cout << j1<< "  " << j2 << "  "<< nn << "\n";
 	
-	double c0,c1,c2,q0,q1,q2,i0,i1,i2,sf0,sf1,sf2, rk01,rk11,rk21, rk02, rk12,rk22 = 0.; 
 	
-	for(int k = 1; k < 4; k = k + 2){
-
-		A[0] = AL0;
-		A[1] = AL0;
-		A[2] = k; 
-		A[3] = 1.;
-		A[4] = -1.;
-		A[5] = 0.;
-		
-		B[0] = j1; 
-		B[1] = j1; 
-		B[2] = AL0; 
-		B[3] = AL0; 
-		B[4] = k; 
-		B[5] = j2; 
+// rk01,rk11,rk21, rk02, rk12,rk22 //READ OUT OF Rk TABLE 
 	
-		c0 = CG2(A);
-		q0 = RACAH(B);
-		i0 = 1+j1 -j2-k; 
-
-		sf0 = sqrt((2*j1+2) * (2*AL0 +1) * (2*AL1 +1)); 
-
-		if(k == 2){ rk01 = (pow(-1,i0) * sf0 * c0 * q0);}	
-		if(k == 4){ rk02 = (pow(-1,i0) * sf0 * c0 * q0);}
-
-		A[1] = AL1; 
-		B[3] = AL1; 
-
-		c1 = CG2(A);
-		q1 = RACAH(B);
-		i1 = 1 +j1 - j2 + AL1 - AL0 - k;
-		sf1 = sqrt((2*j1 +1) * (2*AL0 +1) *(2*AL1 +1));
-		 
-		if(k == 2){ rk11 = (pow(-1,i1) * sf1 * c1 * q1);}
-		if(k == 4){ rk12 = (pow(-1,i1) * sf1 * c1 * q1);}
-
-		A[0] = AL1; 
-		B[2] = AL1; 
-		
-		c2 = CG2(A); 
-		q2 = RACAH(B); 
-		i2 = 1 + j1 - j2 - k;
-		sf2 = sqrt((2*j1 +1) * (2*AL1+1) *(2*AL1+1));
-
-		if(k == 2){ rk21 = (pow(-1,i2) * sf2 * c2 * q2);}
-		if(k == 4){ rk22 = (pow(-1,i2) * sf2 * c2 * q2);}
-		
-
-	}
+	double rk01 = rk20datad[nn];
+	double rk11 = rk21datad[nn];
+	double rk21 = rk22datad[nn];
+	double rk02 = rk40datad[nn];
+	double rk12 = rk41datad[nn];
+	double rk22 = rk42datad[nn];
 
 
-
-
-
-	
-	printf("Bk1 = %lf\n",Bk11);
-	printf("Bk2 = %lf\n",Bk12);
+//	printf("Bk1 = %lf\n",Bk11);
+//	printf("Bk2 = %lf\n",Bk12);
 
 	printf("rk01 = %lf\n",rk01); 
 	printf("rk11 = %lf\n",rk11); 
@@ -600,33 +590,11 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	printf("rk22 = %lf\n",rk22); 
 	
 
-/*
-
-	double JJ[6] = {j1,j1,2,.5,-.5,0};
-	double racah = RACAH(JJ);	
-	double cg222 = CG2(JJ);
-
-	
-	
-//	double cg = CG(J,M,j1,m1,j2,m2);
-//	double W3J= ThreeJsym(j1,m1,j2,m2,j3,m3);
-//	double W6J = SixJsym(j1,j2,j3,j4,j5,j6);
-
-	double cg_a = CG_a(JJ);
-	double W3J_a= ThreeJsym_a(JJ);
-	double W6J_a = SixJsym_a(JJ);
-	printf(" CG convert : %lf\n",cg222);	
-	printf(" CG         : %lf\n", cg_a);
-	printf(" W3-J 	    : %lf\n", W3J_a);
-	printf(" W6-J       : %lf\n", W6J_a);	
-	printf(" Racah convert  : %lf\n", racah);
-
-*/	
 	// here the Chi-sqs from A2 and A4 needed to be added together. 
 
 	 
-	double delta_min = -3.14159 / 2.;
-	double delta_max = 3.14159 / 2.;
+	double delta_min = -3.14159/2.;
+	double delta_max =  3.14159/2.;
 	double step = 0.001; 
 
  	double delta = 0.;
@@ -636,11 +604,14 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	double A4E = residual[2]; 
 	double A2T,a2T = 0.;
 	double A4T,a4T = 0.;
-	double a4E = residual[2]; //NEED FROM AD FIT
 	double rd2T = 0.;
 	double rd4T = 0.;
 	double X22,X24 = 0.;
 	double X2_total = 0.;
+
+	double a2E = A2E/A0E;
+	double a4E = A4E/A0E;
+
 
 	int points = (delta_max - delta_min) / step ; 
 	
@@ -648,36 +619,62 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	vector<double> tdelta;
 
 	for(int i = 0; i< points; i++){
-		tan_delta = i + step + delta_min;
+		tan_delta = i*step + delta_min;
 		delta = tan(tan_delta);
 		rd2T = (rk01 + 2*delta*rk11 + pow(delta,2)*rk21)/(1+pow(delta,2));
 		A2T = QD2*Bk11*rd2T;
 		a2T = A2T/A0E;
-
+		//using the idea that A0E is our normalizer. 
 		
 		rd4T = (rk02 + 2*delta*rk12 + pow(delta,2)*rk22)/(1+pow(delta,2));
 		A4T = QD4*Bk12*rd4T;
 		a4T = A4T/A0E;
 	
-		X22 = pow(abs(A2E- a2T),2)/(abs(a2T));
-		X24 = pow(abs(A4E -a4T),2)/(abs(a4T));
-		X2_total = X22 + X24;
+		X22 = pow(abs(a2E -a2T),2)/(abs(a2T));
+		X24 = pow(abs(a4E -a4T),2)/(abs(a4T));
+		X2_total = (X22 + X24)/2;
 
-		chisqr.push_back(X2_total);
+		chisqr.push_back(-log(X2_total));
 		tdelta.push_back(tan_delta);
+	
+	}
+//NEEDS FIX
+
+//If gui does this how does the vector pushback here make sense. 
+	vector<double> Theta;
+	vector<double> AD_I;
+	double ad_start = -3.1415/2;	
+	int adpoints = (3.1415)/(step);
+	double theta,Iad = 0.;
+	double aaa,aab,aac = 0.;
+	for(int i = 0; i < adpoints; i++){
+
+		theta = i*step + ad_start;
+		aaa = A0E;
+		aab  = A2E*(1.5 * pow(theta,2) - .5);
+        aac  = A4E*(35./8. * pow(theta,4) - 30./8. * pow(theta,2)  +  3./8. );
+
+		Iad = aaa + aab + aac;
+
+		AD_I.push_back(Iad);
+		Theta.push_back(theta);
 
 	}
 
 
 
-
-
-
 	int param;
 
-	param = param_run(det_param_token, gamma_energy_token, ang_file_token, sigma_token, feeding_token, j1j2token);  	
-
-
+	param = param_run(det_param_token, gamma_energy_token, ang_file_token, sigma_token, j1j2token);  	
+/*	
+	cout << det_param_token << "\n"; 
+	cout << gamma_energy_token <<  "\n";  
+	cout << ang_file_token <<  "\n"; 
+	cout << sigma_token <<  "\n";  
+	cout << j1j2token <<  "\n"; 
+	
+	cout << param << "\n";
+*/
 	int optnum = -1;
 	menu();
 
@@ -701,32 +698,44 @@ std::transform(eydata.begin()+1, eydata.end(), std::back_inserter(int_eydata), S
 	if(param == 1 && optnum == 1){
 		optnum = -1;
 
-		//plotting values here
-		std::vector<double> x;
-		std::vector<double> y;
-		
-	        //x will be arctan of mixing ratio. 
-	        //y will be log(X^2); 
-	        
-				
 
-		for(int i = 0; i < 50; i++){
-			x.push_back( i );
-			y.push_back( pow(i, 0.5) );
-		}
-		gui.SetData(x,y);
+		//plotting values here
+        //x will be arctan of mixing ratio. 
+	    //y will be log(X^2); 
+	        
+        gui.SetData(tdelta,chisqr);
 		gui.Init();
 		gui.Loop();
 		gui.Close();
-/*
-		printf("Input option : ");
-		scanf("%d", &optnum);
-		if(optnum < 0){		
-			printf("Input option : ");
-			scanf("%d", &optnum);
-		}*/	
-	}
 
+//		printf("Input option : ");
+//		scanf("%d", &optnum);
+//		if(optnum < 0){		
+//			printf("Input option : ");
+//			scanf("%d", &optnum);
+//		}
+	}
+//Plot Angular distribution fit, with points and error bars. 
+	if(param == 1 and optnum == 2){
+
+
+/*		
+		gui.SetData(dangler,dydata);
+		gui.SetErrors(deydata);
+		gui.SetFit(residual[0],residual[1],residual[2]);
+		
+		gui.Init();
+		gui.Loop();
+		gui.Close();
+*/
+
+
+	}
+//exit
+	if(param == 1 and optnum == 3){
+
+		return 0;
+	}
 
 
 	return 1;

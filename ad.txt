@@ -3,5 +3,5 @@ Distance = 4 [cm]
 Thickness = 5 [cm]
 Atten.C = 0.294297 [cm^-1]
 Gamma_E = 1062 [KeV]
-QD2 = -0.499975
-QD4 = 0.374938
+QD2 = 0.801748
+QD4 = 0.447498

@@ -1,13 +1,5 @@
-#include <X11/Xlib.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vector>
-#include <cmath> 
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <algorithm>
+
+#include "global.h"
 //To compile : g++ AD.cxx -o {Input Executable Name} -lX11
 
 #include "Coeff.h"
@@ -179,11 +171,13 @@ double CG2(double A[6]){
 						for(int i = 0; i<5; i++){
 							IXI = nx[i];
 							termlg= termlg -lgamma(IXI);
-							SS = SS + S1*exp(termlg);
-							S1 =-S1;
-							Cleb=sgnfac*SS;
 						}
-					} 
+						SS = SS + S1*exp(termlg);
+						S1 =-S1;
+					}
+					Cleb=sgnfac*SS;
+						
+					
 				}else{
 	// if (IE >=0) _>>>
 					ID = -ID;
@@ -204,12 +198,12 @@ double CG2(double A[6]){
 					//lgamma(arg) returns the log of the factorial of arg if arg is a natural number.
 					FC2 = IC + 1; 
 					double sqfclg = log(FC2) - lgamma(IT+1);
-					
+/*					
 					printf("IT = %lf\n",IT);
 					printf("sqfclg = %lf\n",sqfclg);
 					
 					printf("FC2 = %lf\n",FC2);
-					printf("lgamma(IT) = %lf\n",lgamma(IT+1));
+					printf("lgamma(IT+1) = %lf\n",lgamma(IT+1));
 					printf("log(fC2) = %lf\n",log(FC2));
 
 					printf("IA = %lf\n",IA);
@@ -218,15 +212,15 @@ double CG2(double A[6]){
 					printf("ID = %lf\n",ID);
 					printf("IE = %lf\n",IE);
 					printf("IF = %lf\n",IF);
-
+*/
 					double IXI;
 					for(int i = 0; i<9;i++){
 						IXI = ix[i];
 						sqfclg = sqfclg + lgamma(IXI);
-						printf("sqfclg = %lf\n",sqfclg);
+			//			printf("sqfclg = %lf\n",sqfclg);
 					}
 					sqfclg = 0.5 * sqfclg;
-
+/*
 
 					printf("Here place 2\n");
 					printf("ix[0] = %lf\n",ix[0]);
@@ -238,7 +232,7 @@ double CG2(double A[6]){
 					printf("ix[6] = %lf\n",ix[6]);
 					printf("ix[7] = %lf\n",ix[7]);
 					printf("ix[8] = %lf\n",ix[8]);
-	
+*/	
 					printf("sqdclg = %lf\n",sqfclg);
 					double xarr[3] = {ix[0],ix[4],ix[5]};
 
@@ -282,6 +276,13 @@ double CG2(double A[6]){
 					if(NZMAX > NZMIN){return 0;}
 					double SS=0.;
 					double S1= pow((-1.),(NZMIN-1));
+				
+					printf("NZMAX = %lf\n",NZMAX);
+					printf("NZMIN = %lf\n",NZMIN);
+					printf("NZ2 = %lf\n",NZ2);
+					printf("NZ3 = %lf\n",NZ3);
+					printf("S1 = %lf\n",S1);
+
 					for(int NZ = NZMIN;NZ<=NZMAX;NZ++){
 
 						double NZM1 = NZ -1;
@@ -291,17 +292,25 @@ double CG2(double A[6]){
 						nx[3] = NZ-NZ2;
 						nx[4] = NZ-NZ3;
 						double termlg = sqfclg - lgamma(NZ);
+					
+						printf("nx[0] = %lf\n",nx[0]);
+						printf("nx[1] = %lf\n",nx[1]);
+						printf("nx[2] = %lf\n",nx[2]);
+						printf("nx[3] = %lf\n",nx[3]);
+						printf("nx[4] = %lf\n",nx[4]);
+
+						printf("termlg = %lf\n",termlg);
+
 						for(int i = 0; i<5; i++){
 							IXI = nx[i];
 							termlg= termlg -lgamma(IXI);
-							SS = SS + S1*exp(termlg);
-							S1 =-S1;
-							Cleb=sgnfac*SS;
-						}
-					} 
+							}
+						SS = SS + S1*exp(termlg);
+						S1 =-S1;
+
+					}
+					Cleb=sgnfac*SS;	
 					
-
-
 				}
 // if (IB != 0) _>>>>
 			}else{
@@ -441,19 +450,24 @@ double CG2(double A[6]){
 						for(int i = 0; i<5; i++){
 							IXI = nx[i];
 							termlg= termlg -lgamma(IXI);
-							SS = SS + S1*exp(termlg);
-							S1 =-S1;
-							Cleb=sgnfac*SS;
 						}
-					} 
+						SS = SS + S1*exp(termlg);
+						S1 =-S1;
+
+					}
+					Cleb=sgnfac*SS;
+						
+					
 				}else{
 	// if (IE >=0) _>>>
+					
 					ID = -ID;
 					IE = -IE;
 					IF = -IF;
 					if((int)(IA+IB-IC)/2 %2 != 0) sgnfac = (-1.)*sgnfac;
 
 					IT  = K0/2 + 1;
+					FC2 = IT +1;
 					ix[0] = IT-IC;
 					ix[1] = IT-IB;
 					ix[2] = IT-IA;
@@ -537,13 +551,11 @@ double CG2(double A[6]){
 						for(int i = 0; i<5; i++){
 							IXI = nx[i];
 							termlg= termlg -lgamma(IXI);
-							SS = SS + S1*exp(termlg);
-							S1 =-S1;
-							Cleb=sgnfac*SS;
 						}
-					} 
-					
-
+						SS = SS + S1*exp(termlg);
+						S1 =-S1;
+					}
+					Cleb=sgnfac*SS;
 
 				}
 // if (IB != 0) _>>>>
@@ -576,39 +588,72 @@ double CG2(double A[6]){
 }
 
 
-double CG(double J, double M, double j1, double m1, double j2, double m2){
+//double CG(double J, double M, double j1, double m1, double j2, double m2){
+double CG(double j1, double j2, double J, double m1, double m2, double M){
 	//recall that j1,m1 + j2,m2 = J,M
 
+	printf("-----------------\n");
 	if(M != m1 + m2) return 0;
 
 	double Jmin  =  abs(j1 - j2);
 	double Jmax  =  j1+j2;
 
+	printf(" Jmin = %lf\n", Jmin);
+	printf(" Jmax = %lf\n", Jmax);
+	
 	if(J < Jmin || Jmax < J) return 0;
 	
-	double a0  = (2*J+1.0)*factorial(J+j1-j2) * factorial(J-j1+j2) * factorial(j1+j2-J)/factorial(J+j1+j2+1.0);
+//	double a0  = (2*J+1.0)*factorial(J+j1-j2) * factorial(J-j1+j2) * factorial(j1+j2-J)/factorial(J+j1+j2+1.0);
+
+
+	double a0  = (2*J+1.0)*tgamma(J+j1-j2+1) * tgamma(J-j1+j2+1) * tgamma(j1+j2-J+1)/tgamma(J+j1+j2+1.0 +1);
 	double A0 = sqrt(a0);
 
-	double a = factorial(J+M)   *factorial(J-M);
-	double a1= factorial(j1+m1) *factorial(j1-m1);
-	double a2= factorial(j2+m2) *factorial(j2-m2);
+//	double a = factorial(J+M)   *factorial(J-M);
+//	double a1= factorial(j1+m1) *factorial(j1-m1);
+//	double a2= factorial(j2+m2) *factorial(j2-m2);
+
+	double a = tgamma(J+M+1)   *tgamma(J-M+1);
+	double a1= tgamma(j1+m1+1) *tgamma(j1-m1+1);
+	double a2= tgamma(j2+m2+1) *tgamma(j2-m2+1);
+
 	double A = sqrt( a  * a1 * a2);
+
+	printf(" a0 = %lf\n", a0);
+	printf(" A0 = %lf\n", A0);
+	printf(" a = %lf\n", a);
+	printf(" a1 = %lf\n", a1);
+	printf(" a2 = %lf\n", a2);
+	printf(" A = %lf\n", A);
 
 	int pmax = min( min(j1+j2-J,j1-m1),j2 + m2);
 	
+	printf("pmax = %d\n",pmax);
+
 	double cg = 0.;
 
 	for( int p =0; p<=pmax;p++){
 
-		double p1 = factorial(j1+j2-J-p);
-		double p2 = factorial(j1-m1-p);
-		double p3 = factorial(j2+m2-p);
-		double p4 = factorial(J -j2 +m1 +p);
-		double p5 = factorial(J -j1 -m2 +p);
-		double t = pow(-1,p)/(factorial(p) * p1 * p2 * p3 * p4 * p5);
-			
+//		double p1 = factorial(j1+j2-J-p);
+//		double p2 = factorial(j1-m1-p);
+//		double p3 = factorial(j2+m2-p);
+//		double p4 = factorial(J -j2 +m1 +p);
+//		double p5 = factorial(J -j1 -m2 +p);
+//		double t = pow(-1,p)/(factorial(p) * p1 * p2 * p3 * p4 * p5);
+	
+
+		double p1 = tgamma(j1+j2-J-p+1);
+		double p2 = tgamma(j1-m1-p+1);
+		double p3 = tgamma(j2+m2-p+1);
+		double p4 = tgamma(J -j2 +m1 +p+1);
+		double p5 = tgamma(J -j1 -m2 +p+1);
+		double t = pow(-1,p)/(tgamma(p+1) * p1 * p2 * p3 * p4 * p5);
+
+		printf("t = %lf\n",t);
 		cg += t;
+		printf("cg = %lf\n",cg);
 	}
+	printf("-----------------\n");
 	return A0*A*cg;
 }
 
@@ -722,15 +767,44 @@ double SixJsym(double j1, double j2, double j3, double j4, double j5, double j6)
 
 int main(int argc, char ** argv){
 
+	//if mod (2*J1,2) = 1 do this
+//	double A0[6] = {1,1,2,0,0,0};
+//	double A1[6] = {1,1,4,0,0,0};
+	
+	//if mod(2*j1,20 = 0 do this
+	
+	double j1 = 1.;
+	double j2 = 2.;
 
-	double A[6] = {1,1,2,0,0,0};
 
+	double A0[6] = {j1,j1,2,.5,-.5,0};
+	double A1[6] = {j1,j1,2,-.5,.5,0};
+	double A2[6] = {j1,j1,4,-.5,.5,0};
+	double A3[6] = {j1,j1,4,.5,-.5,0};
 
-	double cg = CG2(A);
-	double cgr = CG(1,1,2,0,0,0);
+/*
+	double cg0 = CG2(A0);
+	double cg1 = CG2(A1);
+	double cg2 = CG2(A2);
+	double cg3 = CG2(A3);
+*/
+	double cgr0= CG(j1,j1,2,.5,-.5,0);
+	double cgr1= CG(j1,j1,2,-.5,.5,0);
+	double cgr2= CG(j1,j1,4,.5,-.5,0);
+	double cgr3= CG(j1,j1,4,-.5,.5,0);
+/*
 	printf("------\n");
-	printf("CG = %lf\n",cg);
-	printf("CGR = %lf\n",cgr);
+	printf("CG0 = %lf\n",cg0);
+	printf("CG1 = %lf\n",cg1);
+	printf("CG2 = %lf\n",cg2);
+	printf("CG3 = %lf\n",cg3);
+*/	
+	printf("------\n");
+	printf("CGR0 = %lf\n",cgr0);
+	printf("CGR1 = %lf\n",cgr1);
+	printf("CGR2 = %lf\n",cgr2);
+	printf("CGR3 = %lf\n",cgr3);
+
 
 
 	return 0; 
