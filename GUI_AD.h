@@ -54,7 +54,8 @@ class HistoGUIad{
 
 		double A0;
 		double A2E;
-		double A4E; 
+		double A4E;
+		double Ierr;
 		int SetFit(double a, double b, double c){
 			A0 = a; 
 			A2E = b;
@@ -385,7 +386,7 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 		for(int i=0; i < x.size() - 1; i++){
 			x_wid  = (x[i] + x_offset) / width_scale;
 			y_wid  = (y[i] + y_offset) / height_scale;
-			y_errors_wid = (y_errors[i] / height_scale);
+			y_errors_wid = ((y_errors[i]/A0) / height_scale);
 	//		x_wid2 = (x[i + 1] + x_offset) / width_scale;
 	//		y_wid2 = (y[i + 1] + y_offset) / height_scale;
 			//printf("(%f, %f), (%f,%f)\n", x_wid,y_wid,x_wid2,y_wid2);
@@ -424,14 +425,14 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 		for(int i=0; i < (int) width; i += w_step){
 			double x_val   = i * width_scale - x_offset;
 			sprintf(axis_val, "%.1f", x_val);
-			XDrawString(disp, wind, DefaultGC(disp, screen), i, axis_y + 10, axis_val, strlen(axis_val));
+			XDrawString(disp, wind, DefaultGC(disp, screen), i, axis_y + 10/A0, axis_val, strlen(axis_val));
 		}
 
 		int h_step = height / 10;
 		for(int i=0; i < (int) height; i += h_step){
 			double y_val = i * height_scale - y_offset;
 			sprintf(axis_val, "%.1f", y_val);
-			XDrawString(disp, wind, DefaultGC(disp, screen), axis_x + 10, i, axis_val, strlen(axis_val));
+			XDrawString(disp, wind, DefaultGC(disp, screen), axis_x + 10/A0, i, axis_val, strlen(axis_val));
 		}
 
 
@@ -447,7 +448,7 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 			x_wid  = (x[i] + x_offset) / width_scale;
 			y_wid  = (y[i] + y_offset) / height_scale;
 	
-			y_errors_wid = (y_errors[i] / height_scale);
+			y_errors_wid = ((y_errors[i]/A0) / height_scale);
 
 		//	x_wid2 = (x[i + 1] + x_offset) / width_scale;
 		//	y_wid2 = (y[i + 1] + y_offset) / height_scale;

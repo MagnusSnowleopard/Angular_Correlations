@@ -210,9 +210,9 @@ double HistoGUI::legval(double theta){
 	
 	double lg;
 	
-	double	aaa = A0; 
-	double 	aab  = A2E*(1.5 * pow(theta,2) - .5);
-    double  aac  = A4E*(35./8. * pow(theta,4) - 30./8. * pow(theta,2)  +  3./8. );
+	double	aaa = A0/A0; 
+	double 	aab  = (A2E/A0)*(1.5 * pow(cos(theta),2) - .5);
+    double  aac  = (A4E/A0)*(35./8. * pow(cos(theta),4) - 30./8. * pow(cos(theta),2)  +  3./8. );
 	
 	lg = aaa + aab + aac;
 

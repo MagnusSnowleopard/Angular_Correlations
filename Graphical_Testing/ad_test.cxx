@@ -5,10 +5,13 @@ int main ( int argc, char** argv){
 
 	HistoGUI gui; 
 
-	double A0E = 134.327;
-	double A2E = -11.7874;
-	double A4E = 0.760896;
+	double A0E = 111.514;
+	double A2E = -54.3312;
+	double A4E = -76.4778;
 
+	//double A0E = 134.327;
+	//double A2E = -11.7874;
+	//double A4E = 0.760896;
 	double step = 0.0001;
 
 	vector<double> Theta;
@@ -27,7 +30,7 @@ int main ( int argc, char** argv){
 
         Iad = aaa + aab + aac;
 		
-		cout << theta << "\n";
+	//	cout << theta << "\n";
 		
         AD_I.push_back(Iad);
         Theta.push_back(theta);
@@ -43,16 +46,16 @@ int main ( int argc, char** argv){
 	dangle.push_back(1.5619);
 	vector<double> dydata;
 	//= {129.,110.,129.};
-	dydata.push_back(129.);
-	dydata.push_back(110.);
-	dydata.push_back(129.);
-	dydata.push_back(115.);
+	dydata.push_back(129./A0E);
+	dydata.push_back(110./A0E);
+	dydata.push_back(129./A0E);
+	dydata.push_back(115./A0E);
 	vector<double> deydata;
 	//= {10.,10.,10.};
-	deydata.push_back(10.);
-	deydata.push_back(10.);
-	deydata.push_back(10.);
-	deydata.push_back(10.);
+	deydata.push_back(5.);
+	deydata.push_back(5.);
+	deydata.push_back(5.);
+	deydata.push_back(5.);
 
 	
 
