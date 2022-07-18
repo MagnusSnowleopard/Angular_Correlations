@@ -99,9 +99,9 @@ int main(int argc,char **argv){
     }
 
     double QD2 =  QK2(Energy, detradius, targetdistance, detthickness); ;
-    //.82;//NEED TO READ FROM ad.txt in the future. 
+    
     double QD4 =  QK4(Energy, detradius, targetdistance, detthickness); ;
-    //.44;
+  
     //	cout << "QD2 = " << " " << QD2 << "  QD4 = " << " " << QD4 << "\n";
 
     //input data file of Angular Data (theta, Yexp, Yerr)
@@ -226,30 +226,7 @@ int main(int argc,char **argv){
     // Note, the y data must be scaled by sin(theta) of the given angle. 
 
     double a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12 = 0.;
-    /*	
-        for(int i = 0; i< dangler.size(); i++){
-
-    //eq1
-    a1 += 1; //how many data points, not intensional but convientient.  
-    a2 += (1.5 * pow(dangler[i],2) - .5);
-    a3 += (35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
-    a4 += dydata[i]; 
-    //eq2 
-    a5 += (1.5 * pow(dangler[i],2) - .5);
-    a6 += (1.5 * pow(dangler[i],2) - .5)*(1.5 * pow(dangler[i],2) - .5);
-    a7 += (1.5 * pow(dangler[i],2) - .5)*(35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
-    a8 += (1.5 * pow(dangler[i],2) - .5)*dydata[i];
-    //eq4
-    a9 += (35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
-    a10 += (1.5 * pow(dangler[i],2) - .5)*(35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
-    a11 +=(35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. )* (35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. );
-    a12 += (35./8. * pow(dangler[i],4) - 30./8. * pow(dangler[i],2)  +  3./8. )*dydata[i];
-
-
-    }
-
-*/
-
+    
     for(int i = 0; i< dangler.size(); i++){
 
         //eq1
@@ -335,9 +312,9 @@ int main(int argc,char **argv){
     }
 
 
-    cout<<"A0 = "<<residual[0]<<"\n";
-    cout<<"A2 = "<<residual[1]<<"\n";
-    cout<<"A4 = "<<residual[2]<<"\n";
+ //   cout<<"A0 = "<<residual[0]<<"\n";
+    cout<<"a2 = "<<residual[1]/residual[0]<<"\n";
+    cout<<"a4 = "<<residual[2]/residual[0]<<"\n";
 
 
 
@@ -504,9 +481,20 @@ int main(int argc,char **argv){
                 II = j1 - am11; 
                 A[3] = am11; 
                 A[4] = -am11; 
-                
+               
+
+                if(isnan(CG2(A))){ // CG2(A) is NaN
+
+                cout << "Warning, a CG coefficient returned NaN, set to 0.\n";
+                cgg = 0.0; 
+
+                }else{ //CG2(A) is not NaN.  
+
                 cgg = CG2(A);
-                //						cout << "cgg = " << "  " << cgg << "\n";
+                }
+
+                
+   //        		cout << "cgg = " << "  " << cgg << "\n";
                 //						cout << "am11 = " << "  " << am11 << "\n";
                 //						cout << "amsq1 = " << "  " << amsq1 << "\n";
                 //						cout << "x1 = " << "  " << x1 << "\n";
@@ -620,8 +608,11 @@ int main(int argc,char **argv){
 
     double delta_min = -3.14159/2.;
     double delta_max =  3.14159/2.;
-    double step = 0.001; 
+    double THETA_min = 0.;
+    double THETA_max = 3.14159;
+    double step = 0.0001; 
 
+    double Tangle = 0;
     double delta = 0.;
     double atan_delta =0.;
     double A0E = residual[0];//NEED FrOM AF FIT
@@ -629,6 +620,7 @@ int main(int argc,char **argv){
     double A4E = residual[2]; 
     double A2T,a2T = 0.;
     double A4T,a4T = 0.;
+    double rd0T = 0.;
     double rd2T = 0.;
     double rd4T = 0.;
     double X22,X24 = 0.;
@@ -639,14 +631,53 @@ int main(int argc,char **argv){
 
 
     int points = (delta_max - delta_min) / step ; 
+    int t_points = (THETA_max - THETA_min) / step;
 
     vector<double> chisqr;
     vector<double> tdelta;
+    
+    double YT0,YT2,YT4,YT,YE = 0.;
 
+    double Y_err = 10.; 
+
+    //delta loop;
     for(int i = 0; i< points; i++){
-        atan_delta = i*step + delta_min;
-        delta = tan(atan_delta);
-        rd2T = (rk01 + 2*delta*rk11 + pow(delta,2)*rk21)/(1+pow(delta,2));
+        delta = i*step + delta_min;
+       // delta = tan(atan_delta);
+    //now sum over all theta;
+            
+        for(int j = 0; j < dangler.size(); j++){
+            Tangle = dangler[j];
+        //calculate Y_intensity_theory and and experiment and sum over theta
+
+    //      rd0T = (rk01 + 2*delta*rk11 + pow(delta,2)*rk21)/(1+pow(delta,2));
+           
+            rd2T = (rk01 + 2*delta*rk11 + pow(delta,2)*rk21)/(1+pow(delta,2));
+
+            rd4T = (rk02 + 2*delta*rk12 + pow(delta,2)*rk22)/(1+pow(delta,2));
+            
+            YT0 = 1; // P0(cos(theta)) = 1 
+           
+            YT2 = QD2*Bk11*rd2T*((1.5*pow(cos(Tangle),2)-.5));
+            
+            YT4 = QD4*Bk12*rd4T*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
+
+            YT = YT0 + YT2 + YT4;
+
+            YE = 1 + a2E*(1.5*pow(cos(Tangle),2)-.5) + a4E*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
+    
+            X2_total += pow((YT- YE),2)/(200.);
+        }
+        //Figure out denominator. 
+
+        chisqr.push_back(log(X2_total));
+     
+        tdelta.push_back(delta);
+
+        X2_total = 0.;
+       
+    }
+/*
         A2T = QD2*Bk11*rd2T;
         a2T = A2T/A0E;
         //using the idea that A0E is our normalizer. 
@@ -655,15 +686,10 @@ int main(int argc,char **argv){
         A4T = QD4*Bk12*rd4T;
         a4T = A4T/A0E;
 
-        X22 = pow(abs(a2E -a2T),2)/(abs(a2T));
-        X24 = pow(abs(a4E -a4T),2)/(abs(a4T));
+        X22 = pow((a2E -a2T),2)/(a2T);
+        X24 = pow((a4E -a4T),2)/(a4T);
         X2_total = (X22 + X24)/2;
-
-        chisqr.push_back(-log(X2_total));
-        tdelta.push_back(atan_delta);
-
-    }
-
+*/
     vector<double> Theta;
     vector<double> AD_I;
     double ad_start = 0.;	

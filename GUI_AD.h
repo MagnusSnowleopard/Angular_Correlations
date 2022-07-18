@@ -239,18 +239,22 @@ int HistoGUIad::Draw_Fit(double x_low_win, double y_low_win, double x_hi_win, do
 
 	if(x_low_win == -1 and y_low_win == -1 and x_hi_win == -1 and y_hi_win == -1){	
 		// Audomatically decide data postition
-		max_x = x[0];
-		max_y = y[0];
-		min_x = x[0];
-		min_y = y[0];
-
-		for(int i=0; i<x.size(); i++){
+//		max_x = x[0];
+//		max_y = y[0];
+//		min_x = x[0];
+//		min_y = y[0];
+//hard set graphical boundaries
+        max_x = 3.1415;
+		max_y = 2.;
+		min_x = -.1;
+		min_y = -.1;
+/*		for(int i=0; i<x.size(); i++){
 			if(x[i] > max_x) max_x = x[i];
 			if(x[i] < min_x) min_x = x[i];
 			if(y[i] > max_y) max_y = y[i];
 			if(y[i] < min_y) min_y = y[i];
 		}
-
+*/
 		width_scale = (max_x - min_x) / (0.8 * width);
 		x_offset = 0.5 * ((max_x - min_x) / 0.8) - 0.5 * (min_x + max_x);
 
@@ -327,21 +331,28 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 
 	if(x_low_win == -1 and y_low_win == -1 and x_hi_win == -1 and y_hi_win == -1){	
 		// Audomatically decide data postition
-		max_x = x[0];
-		max_y = y[0];
-		min_x = x[0];
-		min_y = y[0];
 
-		for(int i=0; i<x.size(); i++){
+//        max_x = x[0];
+//		max_y = y[0];
+//		min_x = x[0];
+//		min_y = y[0];
+//hard set graphical boundaries
+        max_x = 3.1415;
+		max_y = 2.;
+		min_x = -.1;
+		min_y = -.1;
+/*		for(int i=0; i<x.size(); i++){
 			if(x[i] > max_x) max_x = x[i];
 			if(x[i] < min_x) min_x = x[i];
 			if(y[i] > max_y) max_y = y[i];
 			if(y[i] < min_y) min_y = y[i];
 		}
-		//printf(" max_x = %f\n", max_x );
-		//printf(" max_y = %f\n", max_y );
-		//printf(" min_x = %f\n", min_x );
-		//printf(" min_y = %f\n", min_y );
+*/
+
+	//	printf(" max_x = %f\n", max_x );
+	//	printf(" max_y = %f\n", max_y );
+	//	printf(" min_x = %f\n", min_x );
+	//	printf(" min_y = %f\n", min_y );
 
 		width_scale = (max_x - min_x) / (0.8 * width);
 		x_offset = 0.5 * ((max_x - min_x) / 0.8) - 0.5 * (min_x + max_x);
@@ -352,7 +363,7 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 		//printf("width scale  = %f\n", width_scale);
 		//printf("x_offset     = %f\n", x_offset);
 		//printf("height scale = %f\n", height_scale);
-		//printf("y_offset     = %f\n", y_offset);
+		//printf("y_offset     = %f\n", y_offst);
 		double axis_x  = (0. + x_offset) / width_scale;
 		double axis_y  = (0. + y_offset) / height_scale;
 
@@ -387,15 +398,16 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 			x_wid  = (x[i] + x_offset) / width_scale;
 			y_wid  = (y[i] + y_offset) / height_scale;
 			y_errors_wid = ((y_errors[i]/A0) / height_scale);
-	//		x_wid2 = (x[i + 1] + x_offset) / width_scale;
-	//		y_wid2 = (y[i + 1] + y_offset) / height_scale;
-			//printf("(%f, %f), (%f,%f)\n", x_wid,y_wid,x_wid2,y_wid2);
-	//		XDrawLine(disp, wind, DefaultGC(disp, screen), x_wid, y_wid, x_wid2, y_wid2);
-			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -3, y_wid -3, 6, 6);
-			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -1, y_wid + y_errors_wid, 2, y_errors_wid);
-			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -1, y_wid - y_errors_wid, 2, y_errors_wid);
-//error bar testing 		
-			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -4, y_wid + y_errors_wid, 8, 2);
+            
+            //draws the point
+            XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -3, y_wid -3, 6, 6);
+	        
+            //these are the vertical error bars.
+    //        XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -1, y_wid + y_errors_wid, 2, y_errors_wid);
+	//		XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -1, y_wid - y_errors_wid, 2, y_errors_wid);
+	
+	    	// these are the caps of the error bars ;
+            XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -4, y_wid + y_errors_wid, 8, 2);
 			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -4, y_wid - y_errors_wid, 8, 2);
 		}
 	//	XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid2 -2, y_wid2 -2, 4, 4);
@@ -425,14 +437,14 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 		for(int i=0; i < (int) width; i += w_step){
 			double x_val   = i * width_scale - x_offset;
 			sprintf(axis_val, "%.1f", x_val);
-			XDrawString(disp, wind, DefaultGC(disp, screen), i, axis_y + 10/A0, axis_val, strlen(axis_val));
+			XDrawString(disp, wind, DefaultGC(disp, screen), i, axis_y + 10, axis_val, strlen(axis_val));
 		}
 
 		int h_step = height / 10;
 		for(int i=0; i < (int) height; i += h_step){
 			double y_val = i * height_scale - y_offset;
 			sprintf(axis_val, "%.1f", y_val);
-			XDrawString(disp, wind, DefaultGC(disp, screen), axis_x + 10/A0, i, axis_val, strlen(axis_val));
+			XDrawString(disp, wind, DefaultGC(disp, screen), axis_x + 10, i, axis_val, strlen(axis_val));
 		}
 
 
@@ -449,15 +461,15 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 			y_wid  = (y[i] + y_offset) / height_scale;
 	
 			y_errors_wid = ((y_errors[i]/A0) / height_scale);
-
-		//	x_wid2 = (x[i + 1] + x_offset) / width_scale;
-		//	y_wid2 = (y[i + 1] + y_offset) / height_scale;
-			//	printf("(%f, %f), (%f,%f)\n", x_wid,y_wid,x_wid2,y_wid2);
-		//	XDrawLine(disp, wind, DefaultGC(disp, screen), x_wid, y_wid, x_wid2, y_wid2);
+            
+            //draws the point
 			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -3, y_wid -3, 6, 6);
-			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -1, y_wid , 2, y_errors_wid);
-			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -1, y_wid - y_errors_wid, 2, y_errors_wid);
-//testig for error bars.		
+	        
+            //these are the vertical error bars	
+    //        XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -1, y_wid +y_errors_wid , 2, y_errors_wid);
+	//		XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -1, y_wid - y_errors_wid, 2, y_errors_wid);
+           
+            //These are the error bar caps;.		
 			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -4, y_wid + y_errors_wid, 8, 2);
 			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -4, y_wid - y_errors_wid, 8, 2);
 		}
