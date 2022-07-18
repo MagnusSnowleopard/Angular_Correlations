@@ -5,7 +5,7 @@
 
 using namespace std;
 
-//this program doesnt work and it is not used, I spent so much time transcribing it that maybe, one day some poor soul will come and try to fix it to match rose and brinks. 
+//this program doesnt work and it is not used, I spent so much time transcribing it that maybe, one day some poor soul will come and try to fix it to match the table in rose and brinks. 
 
 double RACAH(double A[6]){
 	
