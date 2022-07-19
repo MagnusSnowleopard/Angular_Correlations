@@ -642,21 +642,22 @@ int main(int argc,char **argv){
 
     //delta loop;
     for(int i = 0; i< points; i++){
-        delta = i*step + delta_min;
-       // delta = tan(atan_delta);
+        atan_delta = i*step + delta_min;
+        delta = tan(atan_delta);
     //now sum over all theta;
             
         for(int j = 0; j < dangler.size(); j++){
             Tangle = dangler[j];
+
         //calculate Y_intensity_theory and and experiment and sum over theta
 
-    //      rd0T = (rk01 + 2*delta*rk11 + pow(delta,2)*rk21)/(1+pow(delta,2));
+       //     rd0T = (1 + 2*delta + pow(delta,2))/(1+pow(delta,2));
            
             rd2T = (rk01 + 2*delta*rk11 + pow(delta,2)*rk21)/(1+pow(delta,2));
 
             rd4T = (rk02 + 2*delta*rk12 + pow(delta,2)*rk22)/(1+pow(delta,2));
             
-            YT0 = 1; // P0(cos(theta)) = 1 
+            YT0 = 1.; // P0(cos(theta)) = 1 
            
             YT2 = QD2*Bk11*rd2T*((1.5*pow(cos(Tangle),2)-.5));
             
@@ -666,13 +667,13 @@ int main(int argc,char **argv){
 
             YE = 1 + a2E*(1.5*pow(cos(Tangle),2)-.5) + a4E*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
     
-            X2_total += pow((YT- YE),2)/(200.);
+            X2_total += pow((YT- YE),2)/(dangler.size()-1)*(pow(Y_err,2));
         }
         //Figure out denominator. 
 
         chisqr.push_back(log(X2_total));
      
-        tdelta.push_back(delta);
+        tdelta.push_back(atan_delta);
 
         X2_total = 0.;
        
