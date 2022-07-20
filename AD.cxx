@@ -31,12 +31,12 @@ int main(int argc,char **argv){
     targetdistance = 4.;
     detthickness = 5.;
 
-    Energy = 1062.;
-    Sigma = 0.5; 
+    Energy = 1147.;
+    Sigma = .5; 
 
 
-    j1 = 2.; 
-    j2 = 1.;
+    j1 = 5.5; 
+    j2 = 3.5;
     //--------------------------------
 
     //TEST MODE? y : 1 || n = 0
@@ -99,9 +99,9 @@ int main(int argc,char **argv){
     }
 
     double QD2 =  QK2(Energy, detradius, targetdistance, detthickness); ;
-    
+
     double QD4 =  QK4(Energy, detradius, targetdistance, detthickness); ;
-  
+
     //	cout << "QD2 = " << " " << QD2 << "  QD4 = " << " " << QD4 << "\n";
 
     //input data file of Angular Data (theta, Yexp, Yerr)
@@ -226,7 +226,7 @@ int main(int argc,char **argv){
     // Note, the y data must be scaled by sin(theta) of the given angle. 
 
     double a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12 = 0.;
-    
+
     for(int i = 0; i< dangler.size(); i++){
 
         //eq1
@@ -312,9 +312,9 @@ int main(int argc,char **argv){
     }
 
 
- //   cout<<"A0 = "<<residual[0]<<"\n";
-    cout<<"a2 = "<<residual[1]/residual[0]<<"\n";
-    cout<<"a4 = "<<residual[2]/residual[0]<<"\n";
+    cout<<"A0 = "<<residual[0]<<"\n";
+    cout<<"A2 = "<<residual[1]<<"\n";
+    cout<<"A4 = "<<residual[2]<<"\n";
 
 
 
@@ -473,7 +473,7 @@ int main(int argc,char **argv){
         for(int i = 2; i<= 4; i = i + 2){
 
             A[2] = i; 
-  
+
             for(int m = 0; m <= j14; m = m +2){
                 am11 = 0.5*(m - j12);
                 amsq1 = pow(am11,2);
@@ -481,20 +481,20 @@ int main(int argc,char **argv){
                 II = j1 - am11; 
                 A[3] = am11; 
                 A[4] = -am11; 
-               
+
 
                 if(isnan(CG2(A))){ // CG2(A) is NaN
 
-                cout << "Warning, a CG coefficient returned NaN, set to 0.\n";
-                cgg = 0.0; 
+                    //  cout << "Warning, a CG coefficient returned NaN, set to 0.\n";
+                    cgg = 0.0; 
 
                 }else{ //CG2(A) is not NaN.  
 
-                cgg = CG2(A);
+                    cgg = CG2(A);
                 }
 
-                
-   //        		cout << "cgg = " << "  " << cgg << "\n";
+
+                //        		cout << "cgg = " << "  " << cgg << "\n";
                 //						cout << "am11 = " << "  " << am11 << "\n";
                 //						cout << "amsq1 = " << "  " << amsq1 << "\n";
                 //						cout << "x1 = " << "  " << x1 << "\n";
@@ -572,7 +572,7 @@ int main(int argc,char **argv){
             for(dit2 = j2datad.begin();dit2 < j2datad.end();dit2++){
 
                 if(j2 == *dit2 and j1 == j1datad[distance(j2datad.begin(),dit2)]){
-                    //			cout << *dit << " " << *dit2 << " Index Equals =  " <<distance(j2datad.begin(),dit2) << "\n";
+                    //    			cout << *dit << " " << *dit2 << " Index Equals =  " <<distance(j2datad.begin(),dit2) << "\n";
                     nn = distance(j2datad.begin(),dit2);
                 }
             }
@@ -590,8 +590,30 @@ int main(int argc,char **argv){
     double rk02 = rk40datad[nn];
     double rk12 = rk41datad[nn];
     double rk22 = rk42datad[nn];
+    //work in progress for possible generation or racah
+    /*
+       double CC1[6] = {j1,j1,2,abs(j1-j2),abs(j1-j2),j2};
+       double CC2[6] = {j1,j1,2,abs(j1-j2),abs(j1-j2)+1,j2};
+       double CC3[6] = {j1,j1,2,abs(j1-j2)+1,abs(j1-j2)+1,j2};
 
 
+       double rkk1 = SixJ2(CC1);
+       double rkk2 = SixJ2(CC2);
+       double rkk3 = SixJ2(CC3);
+
+       printf("rk1 = %lf\n",rkk1); 
+       printf("rk2 = %lf\n",rkk2); 
+       printf("rk3 = %lf\n",rkk3); 
+
+
+
+       double J1 = C[0]; // j1
+       double J2 = C[1]; // j1 
+       double J3 = C[2]; // K  
+       double J4 = C[3]; // Lp = L + 1
+       double J5 = C[4]; // L = |j1 - j2|
+       double J6 = C[5]; // j2
+       */
     //	printf("Bk1 = %lf\n",Bk11);
     //	printf("Bk2 = %lf\n",Bk12);
 
@@ -610,7 +632,7 @@ int main(int argc,char **argv){
     double delta_max =  3.14159/2.;
     double THETA_min = 0.;
     double THETA_max = 3.14159;
-    double step = 0.0001; 
+    double step = 0.01; 
 
     double Tangle = 0;
     double delta = 0.;
@@ -623,19 +645,20 @@ int main(int argc,char **argv){
     double rd0T = 0.;
     double rd2T = 0.;
     double rd4T = 0.;
-    double X22,X24 = 0.;
-    double X2_total = 0.;
-
+    int points = (delta_max - delta_min) / step ; 
+    double X2_total;
+    double YT_tot[points];
+    //  vector<double> YTT;
     double a2E = A2E/A0E;
     double a4E = A4E/A0E;
 
 
-    int points = (delta_max - delta_min) / step ; 
-    int t_points = (THETA_max - THETA_min) / step;
+    //int points = (delta_max - delta_min) / step ; 
 
     vector<double> chisqr;
     vector<double> tdelta;
-    
+    vector<double> YT_point;
+    vector<double> YE_point;
     double YT0,YT2,YT4,YT,YE = 0.;
 
     double Y_err = 10.; 
@@ -644,53 +667,90 @@ int main(int argc,char **argv){
     for(int i = 0; i< points; i++){
         atan_delta = i*step + delta_min;
         delta = tan(atan_delta);
-    //now sum over all theta;
-            
-        for(int j = 0; j < dangler.size(); j++){
-            Tangle = dangler[j];
+        //now sum over all theta;
 
-        //calculate Y_intensity_theory and and experiment and sum over theta
+        for(int j = 0; j < points; j++){
+            Tangle = j*step;
 
-       //     rd0T = (1 + 2*delta + pow(delta,2))/(1+pow(delta,2));
-           
+            //calculate Y_intensity_theory and and experiment and sum over theta
+
+            rd0T = (1 + 2*delta + pow(delta,2))/(1+pow(delta,2));
+
             rd2T = (rk01 + 2*delta*rk11 + pow(delta,2)*rk21)/(1+pow(delta,2));
 
             rd4T = (rk02 + 2*delta*rk12 + pow(delta,2)*rk22)/(1+pow(delta,2));
-            
-            YT0 = 1.; // P0(cos(theta)) = 1 
-           
+
+            YT0 = rd0T; // k = 0;
+
             YT2 = QD2*Bk11*rd2T*((1.5*pow(cos(Tangle),2)-.5));
-            
+
             YT4 = QD4*Bk12*rd4T*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
 
             YT = YT0 + YT2 + YT4;
 
-            YE = 1 + a2E*(1.5*pow(cos(Tangle),2)-.5) + a4E*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
-    
-            X2_total += pow((YT- YE),2)/(dangler.size()-1)*(pow(Y_err,2));
-        }
-        //Figure out denominator. 
+            //    YT_tot[i] += YT;
 
+            YE = 1 + a2E*(1.5*pow(cos(Tangle),2)-.5) + a4E*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
+
+            X2_total += pow((YT- YE),2)/((dangler.size()-1)*(pow(Y_err,2)));
+            //           X2_total[i] = X2_total[i] + pow((YE),2)/((dangler.size()-1)*(pow(Y_err,2)));
+        }
+        //   if(i%27 == 1){ 
+        //   cout << "X2 = " << X2_total[i] << "\n";
+        //   }
+        //   YTT.push_back(YT_tot[i]);
         chisqr.push_back(log(X2_total));
-     
+
         tdelta.push_back(atan_delta);
 
         X2_total = 0.;
-       
+
+        // Attempt to take 1 delta value and plot YT; 
+
+
     }
-/*
-        A2T = QD2*Bk11*rd2T;
-        a2T = A2T/A0E;
-        //using the idea that A0E is our normalizer. 
+    /*
+       for(int k = 0; k < dangler.size(); k++){
+       Tangle = dangler[k];
+       delta = 2.;
 
-        rd4T = (rk02 + 2*delta*rk12 + pow(delta,2)*rk22)/(1+pow(delta,2));
-        A4T = QD4*Bk12*rd4T;
-        a4T = A4T/A0E;
+    //calculate Y_intensity_theory and and experiment and sum over theta
 
-        X22 = pow((a2E -a2T),2)/(a2T);
-        X24 = pow((a4E -a4T),2)/(a4T);
-        X2_total = (X22 + X24)/2;
-*/
+    //     rd0T = (1 + 2*delta + pow(delta,2))/(1+pow(delta,2));
+
+    rd2T = (rk01 + 2*delta*rk11 + pow(delta,2)*rk21)/(1+pow(delta,2));
+
+    rd4T = (rk02 + 2*delta*rk12 + pow(delta,2)*rk22)/(1+pow(delta,2));
+
+    YT0 = 1; // k = 0;
+
+    YT2 = QD2*Bk11*rd2T*((1.5*pow(cos(Tangle),2)-.5));
+
+    YT4 = QD4*Bk12*rd4T*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
+
+    YT = YT0 + YT2 + YT4;
+    //        cout << "YT = " <<YT << "\n"; 
+    //            YT_point.push_back(YT);
+
+    YE = 1 + a2E*(1.5*pow(cos(Tangle),2)-.5) + a4E*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
+    YE_point.push_back(YE);
+
+    //  X2_total += pow((YT- YE),2)/((dangler.size()-1)*(pow(Y_err,2)));
+    }
+    */
+    /*
+       A2T = QD2*Bk11*rd2T;
+       a2T = A2T/A0E;
+    //using the idea that A0E is our normalizer. 
+
+    rd4T = (rk02 + 2*delta*rk12 + pow(delta,2)*rk22)/(1+pow(delta,2));
+    A4T = QD4*Bk12*rd4T;
+    a4T = A4T/A0E;
+
+    X22 = pow((a2E -a2T),2)/(a2T);
+    X24 = pow((a4E -a4T),2)/(a4T);
+    X2_total = (X22 + X24)/2;
+    */
     vector<double> Theta;
     vector<double> AD_I;
     double ad_start = 0.;	
@@ -718,7 +778,7 @@ int main(int argc,char **argv){
         double bbb = dydata[i]; 
 
         dydatas.push_back(bbb/A0E);
-        printf("Normalized y-intensity %i = %lf\n",i+1,dydatas[i]);
+        //  printf("Normalized y-intensity %i = %lf\n",i+1,dydatas[i]);
 
     }
     //This is to temporarily fix the issue with the AD distribution, it takes off the last point in the arrays when plotting or doesnt see them. NEED FIX
@@ -739,85 +799,113 @@ int main(int argc,char **argv){
         */
 
     //Initialize Graphics Here. 
-
+    //  cout<< "Dangler size = " << dangler.size() << "\n";
+    //  cout<< "YT point size = "<< YT_point.size() << "\n";
 
     HistoGUI gui;
 
     HistoGUIad gui_ad; 
 
-// FIX menu input complexity. 
-//
+    // FIX menu input complexity. 
+    //
     int optnum = -1;
     menu();
 
-    printf("Input option : ");
+    printf("Please enter Input Option : ");
     scanf("%d", &optnum);
-    if(optnum < 0){
-        optnum = -1;
-        printf("Negative numbers are not allowed!\nInput option : ");
-        scanf("%d", &optnum);
+    if(optnum >= 0){
+
+
+        // menu
+        if(optnum == 0 and param == 1){
+            Readme();
+            optnum = -1;
+
+            printf("Please enter Input Option : ");
+            scanf("%d", &optnum);
+            //Chi-squared
+        }else if(optnum == 1 and param == 1){
+
+            optnum = -1;
+            //plotting values here
+            //x will be arctan of mixing ratio. 
+            //y will be log(X^2); 
+
+            gui.SetData(tdelta,chisqr);
+            //gui.SetData(Theta,AD_I);
+            gui.Init();
+            gui.Loop();
+            gui.Close();
+            printf("Please enter Input Option : ");
+            scanf("%d", &optnum);
+        }else if(optnum == 2 and param == 1){
+
+            optnum = -1;
+            gui_ad.SetData(dangler,dydatas);
+            gui_ad.SetErrors(deydata);
+            gui_ad.SetFit(residual[0],residual[1],residual[2]);
+
+            gui_ad.Init();
+            gui_ad.Loop();
+            gui_ad.Close();
+            printf("Please enter Input Option : ");
+            scanf("%d", &optnum);
+
+        }else if(param != 1){
+            cout << "Invalid parameter input, something is wrong\n";
+
+        }
+
+
+    }else{
+        do{
+            printf("Negative numbers are not allowed!\nRe-enter Option : ");
+            scanf("%d", &optnum);
+        }while(optnum < 0);}
+
+    if(optnum >= 0 and optnum != 3){
+        //repeat 3 cases.
+
+
+        // menu
+        if(optnum == 0 and param == 1){
+            Readme();
+            optnum = -1;
+
+            //Chi-squared
+        }else if(optnum == 1 and param == 1){
+
+            optnum = -1;
+            //plotting values here
+            //x will be arctan of mixing ratio. 
+            //y will be log(X^2); 
+
+            gui.SetData(dangler,YT_point);
+            // gui.SetData(tdelta,chisqr);
+            //gui.SetData(Theta,AD_I);
+            gui.Init();
+            gui.Loop();
+            gui.Close();
+        }else if(optnum == 2 and param == 1){
+
+            optnum = -1;
+            gui_ad.SetData(dangler,dydatas);
+            gui_ad.SetErrors(deydata);
+            gui_ad.SetFit(residual[0],residual[1],residual[2]);
+
+            gui_ad.Init();
+            gui_ad.Loop();
+            gui_ad.Close();
+
+        }else if(param != 1){
+            cout << "Invalid parameter input, something is wrong\n";
+
+        }
+
+
     }
 
-    if(optnum == 0){
-        Readme();
-        optnum = -1;
 
-        printf("Input option : ");
-        scanf("%d", &optnum);
-    } 
-
-    //if all inputs are valid, plot distribution. 
-    if(param == 1 && optnum == 1){
-        optnum = -1;
-
-
-        //plotting values here
-        //x will be arctan of mixing ratio. 
-        //y will be log(X^2); 
-
-        gui.SetData(tdelta,chisqr);
-        //gui.SetData(Theta,AD_I);
-        gui.Init();
-        gui.Loop();
-        gui.Close();
-
-        //		printf("Input option : ");
-        //		scanf("%d", &optnum);
-        //		if(optnum < 0){		
-        //			printf("Input option : ");
-        //			scanf("%d", &optnum);
-        //		}
-    }
-
-    //Plot Angular distribution fit, with points and error bars. 
-    if(param == 1 and optnum == 2){
-        /*
-           gui.SetData(Theta,AD_I);
-           gui.Init();
-           gui.Loop();
-           gui.Close();
-           */
-
-        gui_ad.SetData(dangler,dydatas);
-        gui_ad.SetErrors(deydata);
-        gui_ad.SetFit(residual[0],residual[1],residual[2]);
-
-        gui_ad.Init();
-        gui_ad.Loop();
-        gui_ad.Close();
-
-
-
-    }
-    //exit
-
-    printf("Input option : ");
-    scanf("%d", &optnum);
-    if(optnum < 0){
-        optnum = -1;
-        printf("Negative numbers are not allowed!\nInput option : ");
-        scanf("%d", &optnum);
-    }
 
     if(param == 1 and optnum == 3){
 

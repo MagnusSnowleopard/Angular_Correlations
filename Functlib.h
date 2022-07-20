@@ -11,8 +11,8 @@ void menu(){
 	std::cout <<"==========================================\n";
 	std::cout<< "\t\t Menu Options \t \n";
 	std::cout<< "0 - Reading and Instructions \n"; 
-	std::cout<< "1 - Plot Chi Sqr \n";
-	std::cout<< "2 - Plot Ang.Dis Fit (Maybe)\n"; 
+	std::cout<< "1 - Plot Chi Sqr vs arc-tan delta\n";
+	std::cout<< "2 - Plot Angular Distribution \n"; 
 	std::cout<< "3 - Exit \n";  
 	std::cout <<"==========================================\n";
 	std::cout<< "                                          \n";
@@ -29,7 +29,7 @@ void Readme(){
 	std::cout<< " \n"; 
 	std::cout<< " Follow the prompt in order to correctly display \n";
 	std::cout<< " \n";
-	std::cout<< " To close the gui, press any button. \n";
+	std::cout<< " To close the gui, press most buttons. \n";
 	std::cout<< " To zoom in, left click then drag and let go. To unzoom\n";
 	std::cout<< " press the space bar. To draw, right click\n";
 	std::cout<< "                                          \n";

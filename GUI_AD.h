@@ -397,7 +397,8 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 		for(int i=0; i < x.size() - 1; i++){
 			x_wid  = (x[i] + x_offset) / width_scale;
 			y_wid  = (y[i] + y_offset) / height_scale;
-			y_errors_wid = ((y_errors[i]/A0) / height_scale);
+		//	y_errors_wid = ((y_errors[i]/A0) / height_scale);
+			y_errors_wid = ((y_errors[i]) / height_scale);
             
             //draws the point
             XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -3, y_wid -3, 6, 6);
@@ -460,7 +461,8 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 			x_wid  = (x[i] + x_offset) / width_scale;
 			y_wid  = (y[i] + y_offset) / height_scale;
 	
-			y_errors_wid = ((y_errors[i]/A0) / height_scale);
+		//	y_errors_wid = ((y_errors[i]/A0) / height_scale);
+			y_errors_wid = ((y_errors[i]) / height_scale);
             
             //draws the point
 			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -3, y_wid -3, 6, 6);
