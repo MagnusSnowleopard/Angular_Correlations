@@ -14,8 +14,15 @@ using namespace std;
 #ifndef __CINT__ 
 
 int main(int argc,char **argv){
+/*
+    for( float i = -2.; i < 6.; i += 1.0){
+        printf("%.0f! = %f \n",i, factorial(i));
+    } 
 
-
+    for( float m1 = -5.5; m1 <= 5.5; m1 += 1){
+        printf("m1: %.1f, %f \n", m1, CGcoeff(2, 0., 5.5, m1, 5.5, -m1));
+    }
+*/
     double j1, j2;
 
 
@@ -98,9 +105,9 @@ int main(int argc,char **argv){
         //then calucate QD2 and QD4, and replace the 0 with them. 
     }
 
-    double QD2 =  QK2(Energy, detradius, targetdistance, detthickness); ;
+    double QD2 =  QK2(Energy, detradius, targetdistance, detthickness);
 
-    double QD4 =  QK4(Energy, detradius, targetdistance, detthickness); ;
+    double QD4 =  QK4(Energy, detradius, targetdistance, detthickness);
 
     //	cout << "QD2 = " << " " << QD2 << "  QD4 = " << " " << QD4 << "\n";
 
@@ -199,6 +206,9 @@ int main(int argc,char **argv){
         dangler.push_back(aa*3.14159/180.);
         printf("dangle = %lf\n",dangler[i]);
     }
+    
+
+
     // if you need to scale the y data by sin(theta)	
 
 
@@ -365,7 +375,7 @@ int main(int argc,char **argv){
 
     double cg1, cg2 = 0.;	
 
-    double Bk11, Bk12 = 0.;
+    double Bk10, Bk11, Bk12 = 0.;
     if(Sigma == 0){
         if(IS == 1){
             A[0] = j1;
@@ -481,33 +491,24 @@ int main(int argc,char **argv){
                 II = j1 - am11; 
                 A[3] = am11; 
                 A[4] = -am11; 
+                
+                
 
-
-                if(isnan(CG2(A))){ // CG2(A) is NaN
-
-                    //  cout << "Warning, a CG coefficient returned NaN, set to 0.\n";
-                    cgg = 0.0; 
-
-                }else{ //CG2(A) is not NaN.  
-
-                    cgg = CG2(A);
-                }
-
-
-                //        		cout << "cgg = " << "  " << cgg << "\n";
-                //						cout << "am11 = " << "  " << am11 << "\n";
-                //						cout << "amsq1 = " << "  " << amsq1 << "\n";
-                //						cout << "x1 = " << "  " << x1 << "\n";
-
+                cgg = CGcoeff(i,0,j1,am11,j1,-am11);
+               // cgg = CG2(A);
+              //  printf("K : %d, j1 : %.1f m1 : %.1f, %f \n", i, j1, am11, cgg);    
+            //    cout << "CG =" << cgg << "\n";
+             //   cout << "m1 =" << am11 << "\n";
+               // cout << "m2 =" << -am11 << "\n";
                 ex1 = exp(x1);
                 tTerm = cn1*ex1*pow(-1,II) * sfact*cgg;
-
-                //						cout <<"tTerm "<<"  " << tTerm << "\n";
 
                 if(i == 2){ Bk11 = Bk11 + tTerm;
                 }else if(i == 4){ Bk12 = Bk12 + tTerm;} 
             }
         }
+
+//        cout << "Bk10" << " " << Bk10 << "\n";
         cout << "Bk11" << " " << Bk11 << "\n";
         cout << "Bk12" << " " << Bk12 << "\n";
 
@@ -661,7 +662,7 @@ int main(int argc,char **argv){
     vector<double> YE_point;
     double YT0,YT2,YT4,YT,YE = 0.;
 
-    double Y_err = 10.; 
+    double Y_err; 
 
     //delta loop;
     for(int i = 0; i< points; i++){
@@ -669,18 +670,19 @@ int main(int argc,char **argv){
         delta = tan(atan_delta);
         //now sum over all theta;
 
-        for(int j = 0; j < points; j++){
-            Tangle = j*step;
+        for(int j = 0; j < dangler.size(); j++){
+            Tangle = dangler[j];
+            Y_err = deydata[j];
 
             //calculate Y_intensity_theory and and experiment and sum over theta
 
-            rd0T = (1 + 2*delta + pow(delta,2))/(1+pow(delta,2));
 
             rd2T = (rk01 + 2*delta*rk11 + pow(delta,2)*rk21)/(1+pow(delta,2));
 
             rd4T = (rk02 + 2*delta*rk12 + pow(delta,2)*rk22)/(1+pow(delta,2));
 
-            YT0 = rd0T; // k = 0;
+            YT0 = 1; // k = 0; Bk10*?
+
 
             YT2 = QD2*Bk11*rd2T*((1.5*pow(cos(Tangle),2)-.5));
 
@@ -690,7 +692,7 @@ int main(int argc,char **argv){
 
             //    YT_tot[i] += YT;
 
-            YE = 1 + a2E*(1.5*pow(cos(Tangle),2)-.5) + a4E*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
+            YE = 1. + a2E*(1.5*pow(cos(Tangle),2)-.5) + a4E*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
 
             X2_total += pow((YT- YE),2)/((dangler.size()-1)*(pow(Y_err,2)));
             //           X2_total[i] = X2_total[i] + pow((YE),2)/((dangler.size()-1)*(pow(Y_err,2)));
@@ -709,10 +711,10 @@ int main(int argc,char **argv){
 
 
     }
-    /*
+// this is for viewing the theoretical angular distribution as a function of constant delta.    
        for(int k = 0; k < dangler.size(); k++){
        Tangle = dangler[k];
-       delta = 2.;
+       delta = .8;
 
     //calculate Y_intensity_theory and and experiment and sum over theta
 
@@ -730,14 +732,14 @@ int main(int argc,char **argv){
 
     YT = YT0 + YT2 + YT4;
     //        cout << "YT = " <<YT << "\n"; 
-    //            YT_point.push_back(YT);
+    YT_point.push_back(YT);
 
     YE = 1 + a2E*(1.5*pow(cos(Tangle),2)-.5) + a4E*(35./8.* pow(cos(Tangle),4) - 30./8.*pow(cos(Tangle),2) + 3./8.);
     YE_point.push_back(YE);
 
     //  X2_total += pow((YT- YE),2)/((dangler.size()-1)*(pow(Y_err,2)));
     }
-    */
+    
     /*
        A2T = QD2*Bk11*rd2T;
        a2T = A2T/A0E;
@@ -832,6 +834,8 @@ int main(int argc,char **argv){
             //y will be log(X^2); 
 
             gui.SetData(tdelta,chisqr);
+           // gui.SetData(dangler,YE_point);
+           // gui.SetData(dangler,YT_point);
             //gui.SetData(Theta,AD_I);
             gui.Init();
             gui.Loop();
@@ -880,8 +884,8 @@ int main(int argc,char **argv){
             //x will be arctan of mixing ratio. 
             //y will be log(X^2); 
 
-            gui.SetData(dangler,YT_point);
-            // gui.SetData(tdelta,chisqr);
+            //gui.SetData(dangler,YT_point);
+            gui.SetData(tdelta,chisqr);
             //gui.SetData(Theta,AD_I);
             gui.Init();
             gui.Loop();

@@ -370,10 +370,15 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 		XSetForeground(disp, DefaultGC(disp,screen), xcolour.pixel);
 		XDrawLine(disp, wind, DefaultGC(disp, screen), axis_x, 0.0, axis_x, height);
 		XDrawLine(disp, wind, DefaultGC(disp, screen), 0.0, axis_y, width, axis_y);
-
+        char* x_axisl = (char*)"arctan( delta ) in Radians";
+        char* y_axisl = (char*)"Log Chi-Squared";
 		char axis_val[4];
 		int w_step = width / 10;
-		for(int i=0; i < (int) width; i += w_step){
+
+		XDrawString(disp, wind, DefaultGC(disp, screen), max_x *0.9, min_y,x_axisl, strlen(x_axisl));
+		XDrawString(disp, wind, DefaultGC(disp, screen), max_y *0.9, min_x,y_axisl, strlen(y_axisl));
+        
+        for(int i=0; i < (int) width; i += w_step){
 			double x_val   = i * width_scale - x_offset;
 			sprintf(axis_val, "%.1f", x_val);
 			XDrawString(disp, wind, DefaultGC(disp, screen), i, axis_y + 10, axis_val, strlen(axis_val));
@@ -397,8 +402,8 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 		for(int i=0; i < x.size() - 1; i++){
 			x_wid  = (x[i] + x_offset) / width_scale;
 			y_wid  = (y[i] + y_offset) / height_scale;
-		//	y_errors_wid = ((y_errors[i]/A0) / height_scale);
-			y_errors_wid = ((y_errors[i]) / height_scale);
+			y_errors_wid = ((y_errors[i]/A0) / height_scale); //errors will also be scaled by A0
+	    //	y_errors_wid = ((y_errors[i]) / height_scale);
             
             //draws the point
             XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -3, y_wid -3, 6, 6);
@@ -433,6 +438,8 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 		XDrawLine(disp, wind, DefaultGC(disp, screen), axis_x, 0.0, axis_x, height);
 		XDrawLine(disp, wind, DefaultGC(disp, screen), 0.0, axis_y, width, axis_y);
 
+        char* x_axisl = (char*)"arctan( delta ) in Radians";
+        char* y_axisl = (char*)"Log Chi-Squared";
 		char axis_val[4];
 		int w_step = width / 10;
 		for(int i=0; i < (int) width; i += w_step){
@@ -441,7 +448,10 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 			XDrawString(disp, wind, DefaultGC(disp, screen), i, axis_y + 10, axis_val, strlen(axis_val));
 		}
 
-		int h_step = height / 10;
+		XDrawString(disp, wind, DefaultGC(disp, screen), max_x *0.9, min_y,x_axisl, strlen(x_axisl));
+		XDrawString(disp, wind, DefaultGC(disp, screen), max_y *0.9, min_x,y_axisl, strlen(y_axisl));
+        
+        int h_step = height / 10;
 		for(int i=0; i < (int) height; i += h_step){
 			double y_val = i * height_scale - y_offset;
 			sprintf(axis_val, "%.1f", y_val);
@@ -461,8 +471,8 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 			x_wid  = (x[i] + x_offset) / width_scale;
 			y_wid  = (y[i] + y_offset) / height_scale;
 	
-		//	y_errors_wid = ((y_errors[i]/A0) / height_scale);
-			y_errors_wid = ((y_errors[i]) / height_scale);
+			y_errors_wid = ((y_errors[i]/A0) / height_scale); //Error bars scaled by A0 
+	    //  y_errors_wid = ((y_errors[i]) / height_scale);
             
             //draws the point
 			XFillRectangle(disp, wind, DefaultGC(disp, screen), x_wid -3, y_wid -3, 6, 6);
