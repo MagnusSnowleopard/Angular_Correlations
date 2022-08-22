@@ -1,3 +1,26 @@
+//#################################################################
+//  This program is the main functional of an Angular Ditribution 
+//  calculation to fit and determine accepted values of delta.
+//
+//  Input file need is two .csv, one is a table of racah values, 
+//  the second is the experimental data file. The program can handle
+//  any amount of angles of detectors.  
+//
+//  The inputs needed are j1 and j2 values, the gamma-ray  ,the radius, 
+//  distance and depth of the detectors, and the sigma of magnetic 
+//  substate distribution following the reaction of interest. 
+//
+//  The program generates 2 graphs - 1 Visible Angular distribution
+//  plot and fit normalized by A0. - 2 The log(Chi-squared) vs 
+//  arctan(delta) graph. 
+//
+//  The program also outputs a ad.txt which has QDK coeff. and other
+//  detector parameters.  
+//
+//To compile : g++ AD.cxx -o {Input Executable Name} -lX11
+//For more information about angular distributions, read Rose and Brinks, and Frank Moore (1988). 
+//#################################################################
+
 #include "global.h"
 
 #include "GUI_AD.h"
@@ -6,9 +29,6 @@
 #include "QDK.h"
 #include "Cleb.h"
 
-
-//To compile : g++ AD.cxx -o {Input Executable Name} -lX11
-//For more information about angular distributions, read Rose and Brinks, and Frank Moore (1988). 
 
 using namespace std;
 #ifndef __CINT__ 
@@ -38,12 +58,12 @@ int main(int argc,char **argv){
     targetdistance = 4.;
     detthickness = 5.;
 
-    Energy = 1147.;
-    Sigma = .5; 
+    Energy = 426.;
+    Sigma = 1.0; 
 
 
-    j1 = 5.5; 
-    j2 = 3.5;
+    j1 = 7.5; 
+    j2 = 5.5;
     //--------------------------------
 
     //TEST MODE? y : 1 || n = 0
@@ -204,29 +224,15 @@ int main(int argc,char **argv){
         double aa = dangle[i]; 
 
         dangler.push_back(aa*3.14159/180.);
-        printf("dangle = %lf\n",dangler[i]);
+        printf("Angle %d = %lf\n",i,dangler[i]);
     }
     
 
 
-    // if you need to scale the y data by sin(theta)	
-
-
-    /*
-       for(int i=0; i<content.size(); i++){
-       for(int j=0; j<content[i].size(); j++){
-       cout<< content[i][j]<<" ";
-       }
-       cout<<"\n";
-       }
-       */
     //legendre fitting 
     // F[xi] = A0(1) + A2(P2(cos(xi))) + A4(P4(cos(xi)))
     //xi data is angle data in radians. 
     //yi data is y-intensity data. 
-
-    //to change the number of angles, just mess with the indexing of the read in and arrays. 
-
 
     //12 constants. this will build our matrix for gaussian elinmination. 
     //[a1 a2   a3] [A0] = [a4]
@@ -323,8 +329,8 @@ int main(int argc,char **argv){
 
 
     cout<<"A0 = "<<residual[0]<<"\n";
-    cout<<"A2 = "<<residual[1]<<"\n";
-    cout<<"A4 = "<<residual[2]<<"\n";
+    cout<<"a2 = "<<residual[1]/residual[0]<<"\n";
+    cout<<"a4 = "<<residual[2]/residual[0]<<"\n";
 
 
 
@@ -779,7 +785,7 @@ int main(int argc,char **argv){
     for(int i = 0; i < dydata.size(); i++){
         double bbb = dydata[i]; 
 
-        dydatas.push_back(bbb/A0E);
+         dydatas.push_back(bbb/A0E);
         //  printf("Normalized y-intensity %i = %lf\n",i+1,dydatas[i]);
 
     }
@@ -845,7 +851,8 @@ int main(int argc,char **argv){
         }else if(optnum == 2 and param == 1){
 
             optnum = -1;
-            gui_ad.SetData(dangler,dydatas);
+           // gui_ad.SetData(dangler,dydata); //dydata means you  are using already normalizing data.
+            gui_ad.SetData(dangler,dydatas); //dydatas means you are using non-A0 normalized data to start with.
             gui_ad.SetErrors(deydata);
             gui_ad.SetFit(residual[0],residual[1],residual[2]);
 

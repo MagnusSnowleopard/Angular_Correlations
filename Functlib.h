@@ -1,6 +1,9 @@
-
+//################################################################
+// This file contains the menu outputs and also misc conversion 
+// functions used throughout the program.  
+//
+//################################################################
 #include "global.h"
-//To compile : g++ AD.cxx -o {Input Executable Name} -lX11
 
 using namespace std;
 
@@ -20,22 +23,27 @@ void menu(){
 
 void Readme(){
 
-	std::cout<< "                                          \n";
-	std::cout<< " The program calculates Chi-Squared values \n";
+	std::cout<< "                                            \n";
+	std::cout<< " The program calculates Chi-Squared values  \n";
 	std::cout<< " from experimental angular distributions as \n";
-	std::cout<< " a function of multipole ratios using the \n"; 
-	std::cout<< " theoretical angular distribution formulae \n"; 
-	std::cout<< " in rose and brink \n";
+	std::cout<< " a function of multipole ratios using the   \n"; 
+	std::cout<< " theoretical angular distribution formulae  \n"; 
+	std::cout<< " in Rose and Brinks.                        \n";
 	std::cout<< " \n"; 
 	std::cout<< " Follow the prompt in order to correctly display \n";
 	std::cout<< " \n";
-	std::cout<< " To close the gui, press most buttons. \n";
+	std::cout<< " To close the gui, press most buttons.      \n";
 	std::cout<< " To zoom in, left click then drag and let go. To unzoom\n";
-	std::cout<< " press the space bar. To draw, right click\n";
-	std::cout<< "                                          \n";
-	std::cout<< " ad.txt is generated with geometric stats.\n";
-	std::cout<< " Then at the end it generates CG/Racah\n";	
-	std::cout<< "                                          \n";
+	std::cout<< " press the space bar. To draw, right click. \n";
+	std::cout<< "                                            \n";
+	std::cout<< " ad.txt is generated with geometric stats.  \n";
+	std::cout<< " Multiple different vectors available for   \n";	
+	std::cout<< " other analysis perspectives.               \n";
+	std::cout<< "                                            \n";
+	std::cout<< " To run in test mode, see the top of AD.cxx.\n";
+	std::cout<< " Running in test mode allows for faster use.\n";	
+	std::cout<< "                                            \n";
+	std::cout<< "                                            \n";
 }
 
 int param_run(int dt, int gt, int at, int st, int jt){

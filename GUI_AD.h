@@ -1,10 +1,15 @@
-#include "global.h"
-
-//To compile : g++ AD.cxx -o {Input Executable Name} -lX11
+//#############################################################################
+//
 // VERSION : 1.1 (Overlay for Angular Fit Display) 
-// Created with thanks to Daniel Folds Holt - University of Cambridge Cavendish Lab
+//
+// The  purpose of this GUI is for displaying angular distributions of the 
+// gamma-ray decays inputed via the *.csv file. It is equipped with error 
+// bars and a fit overlay. The output of this file is scaled by A0. 
+//
+//############################################################################
 
 
+#include "global.h"
 
 
 using namespace std;
@@ -209,10 +214,11 @@ int HistoGUIad::Zoom(int mouse_x, int mouse_y){
 double HistoGUIad::legval(double theta){
 	
 	double lg;
-	
-	double	aaa = A0/A0; 
-	double 	aab  = (A2E/A0)*(1.5 * pow(cos(theta),2) - .5);
-    double  aac  = (A4E/A0)*(35./8. * pow(cos(theta),4) - 30./8. * pow(cos(theta),2)  +  3./8. );
+	double norm = A0; 
+
+	double	aaa = A0/norm; 
+	double 	aab  = (A2E/norm)*(1.5 * pow(cos(theta),2) - .5);
+    double  aac  = (A4E/norm)*(35./8. * pow(cos(theta),4) - 30./8. * pow(cos(theta),2)  +  3./8. );
 	
 	
 	lg = aaa + aab + aac;
@@ -245,9 +251,9 @@ int HistoGUIad::Draw_Fit(double x_low_win, double y_low_win, double x_hi_win, do
 //		min_y = y[0];
 //hard set graphical boundaries
         max_x = 3.1415;
-		max_y = 2.;
+		max_y = A0*1.5;
 		min_x = -.1;
-		min_y = -.1;
+		min_y = A0*.5;
 /*		for(int i=0; i<x.size(); i++){
 			if(x[i] > max_x) max_x = x[i];
 			if(x[i] < min_x) min_x = x[i];
@@ -338,9 +344,9 @@ int HistoGUIad::DrawData(double x_low_win, double y_low_win, double x_hi_win, do
 //		min_y = y[0];
 //hard set graphical boundaries
         max_x = 3.1415;
-		max_y = 2.;
+		max_y = A0*1.5;
 		min_x = -.1;
-		min_y = -.1;
+		min_y = A0*0.5;
 /*		for(int i=0; i<x.size(); i++){
 			if(x[i] > max_x) max_x = x[i];
 			if(x[i] < min_x) min_x = x[i];

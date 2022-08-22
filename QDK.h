@@ -1,3 +1,11 @@
+//#####################################################################
+//
+//This file is a geometric calculation of the efficiency of radiation
+//in germanium crystals as a function of energy, and the crystal
+//geometry of the experiment.
+//
+//#####################################################################
+
 #include "global.h"
 
 using namespace std;

@@ -1,8 +1,10 @@
 #ifndef __iamauniqueid_h__
 #define __iamauniqueid_h__
-
-//define any global data type here.
-
+//########################################################
+//This file is used for defining global data type and all
+//includes needed for the program. 
+//
+//########################################################
 #include <X11/Xlib.h>
 #include <stdio.h>
 #include <cstdio>

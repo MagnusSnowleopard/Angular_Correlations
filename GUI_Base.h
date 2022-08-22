@@ -1,10 +1,12 @@
-#include <X11/Xlib.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vector>
-#include <cmath> 
+//####################################################################
+//
+// This is a base version of the AD GUI allowing the user to plot two
+// input double vectors. The GUI consists of zooming, crosshair readout, 
+// and drawing on the canvas.  
+//
+//####################################################################
 
+#include "global.h"
 
 class HistoGUI{
 

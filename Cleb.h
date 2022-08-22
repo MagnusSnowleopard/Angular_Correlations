@@ -1,7 +1,13 @@
-
-#include "global.h"
+//#############################################################
 //To compile : g++ AD.cxx -o {Input Executable Name} -lX11
 //#include "Coeff.h"
+//
+//This file contains member functions of Clebsh-Gordan functions
+//and other methods to caluculate 3J and 6J symbols if needed
+//for direct Racah calculations. 
+//
+//#############################################################
+#include "global.h"
 
 using namespace std;
 
