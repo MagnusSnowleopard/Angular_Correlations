@@ -17,7 +17,8 @@
 //  The program also outputs a ad.txt which has QDK coeff. and other
 //  detector parameters.  
 //
-//To compile : g++ AD.cxx -o {Input Executable Name} -lX11
+//  To compile : g++ AD.cxx -o {Input Executable Name} -lX11
+//  If there is a "stack smashing detection" error add on the flag " -fno-stack-protector "
 //For more information about angular distributions, read Rose and Brinks, and Frank Moore (1988). 
 //#################################################################
 
