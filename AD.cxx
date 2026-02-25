@@ -29,7 +29,7 @@
 #include "Functlib.h"
 #include "QDK.h"
 #include "Cleb.h"
-
+#include "Racah2.h"
 
 using namespace std;
 #ifndef __CINT__ 
@@ -233,6 +233,7 @@ int main(int argc,char **argv){
 
 	//input data file of Angular Data (theta, Yexp, Yerr)
 
+
 	vector<vector<string> > content;
 	vector<string> row;
 	string line, word; 
@@ -255,11 +256,19 @@ int main(int argc,char **argv){
 
 			row.clear();
 
+			// Accept comma, space, and tab delimiters
+			for (size_t i = 0; i < line.size(); ++i) {
+				if (line[i] == ',') line[i] = ' ';
+			}
+
 			stringstream str(line);
 
-			while(getline(str, word, ','))
-
+			while (str >> word)
 				row.push_back(word);
+
+			// Optional safety check (recommended)
+			if (row.size() < 3) continue;
+
 			content.push_back(row);
 			adata.push_back(row[0]);
 			ydata.push_back(row[1]);
@@ -281,11 +290,19 @@ int main(int argc,char **argv){
 
 					row.clear();
 
+					// Accept comma, space, and tab delimiters
+					for (size_t i = 0; i < line.size(); ++i) {
+						if (line[i] == ',') line[i] = ' ';
+					}
+
 					stringstream str(line);
 
-					while(getline(str, word, ','))
-
+					while (str >> word)
 						row.push_back(word);
+
+					// Optional safety check (recommended)
+					if (row.size() < 3) continue;
+
 					content.push_back(row);
 					adata.push_back(row[0]);
 					ydata.push_back(row[1]);
@@ -301,6 +318,7 @@ int main(int argc,char **argv){
 		ang_file_token = 1;
 
 	}
+
 
 	for(int i = 0; i< adata.size();i++){
 		//		cout << adata[i] << "\n";
@@ -670,6 +688,24 @@ int main(int argc,char **argv){
 	vector<double> rk40datad = string_to_double_vector(Rk40data);
 	vector<double> rk41datad = string_to_double_vector(Rk41data);
 	vector<double> rk42datad = string_to_double_vector(Rk42data);
+
+	RacahCalc::Coeffs c;
+	if (!RacahCalc::ComputeRacahCoeffs(j1, j2, c)) {
+		std::printf("Failed to compute coefficients.\n");
+		return 1;
+	}
+
+	std::printf("J1=7.5 J2=5.5\n");
+	std::printf("calc rk01 = % .4f\n", c.rk01);
+	std::printf("calc rk11 = % .4f\n", c.rk11);
+	std::printf("calc rk21 = % .4f\n", c.rk21);
+	std::printf("calc rk02 = % .4f\n", c.rk02);
+	std::printf("calc rk12 = % .4f\n", c.rk12);
+	std::printf("calc rk22 = % .4f\n", c.rk22);
+
+
+
+
 
 	int nn = 0;
 	for(dit = j1datad.begin();dit < j1datad.end();dit++){
