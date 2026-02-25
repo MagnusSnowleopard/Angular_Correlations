@@ -1,3 +1,5 @@
 ADEX
-ADT
+AD
 .gitignore
+'eval "$(ssh-agent -s)".pub'
+'eval "$(ssh-agent -s)"
