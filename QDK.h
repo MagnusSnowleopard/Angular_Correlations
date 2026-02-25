@@ -166,10 +166,10 @@ double QK2(double Energy, double radius, double distance, double thickness){
 */	
 	double QD2  = (ans1+ans4)/(ans3+ans6);
 	double QD4  = (ans2+ans5)/(ans3+ans6);
-	printf("--------------\n");
-	printf("  QD2 = %lf\n",QD2);
-	printf("  QD4 = %lf\n",QD4);
-	printf("--------------\n");
+//	printf("--------------\n");
+//	printf("  QD2 = %lf\n",QD2);
+//	printf("  QD4 = %lf\n",QD4);
+//	printf("--------------\n");
 
 //Now output a file that contains R, D , T , gamma energy, attentuation coeff, q2 and q4
 
