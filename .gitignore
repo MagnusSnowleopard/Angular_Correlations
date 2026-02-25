@@ -1,5 +1,5 @@
 ADEX
 AD
+/Graphical_Testing 
+/Test_Scripts
 .gitignore
-'eval "$(ssh-agent -s)".pub'
-'eval "$(ssh-agent -s)"
