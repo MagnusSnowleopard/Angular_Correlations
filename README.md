@@ -10,6 +10,62 @@
 
 # Finally reading from Rose and Brink, the program reads the first 2 Racah coefficient sets, 6 total, depending on j2 and j1. The program can be modified to use more than 3 angles, and for  higher multipoles of the angular distribution. Using these coefficients, theoretical A2 and A4 values can be compared, illuminating the mixing ratio. 
 
-# This program has its own graphical interface. Using X11 graphics, there is a functional terminal based menu that will promt and execute the 2 plots of interest. Option 1 displays the chi-squared minimization. Option 2 displays the Angular distribution overlayed with a legendre polinomial fit and respective error bars. Option 3 closes the program. 
+/*
+======================== README (inline) ========================
 
-# The GUI can zoom in by dragging and letting go, you can draw with left click, with right click the coordinates of the point is printed to the terminal. With space-bar you can unzoom the veiw. 
+Overview
+--------
+This program computes and visualizes gamma-ray angular distributions and a chi-squared scan over mixing ratio δ
+in a single ROOT GUI window.
+
+GUI Inputs (user-editable)
+--------------------------
+- j1, j2        : spins (integer or half-integer)
+- Eγ (keV)      : gamma-ray energy in keV
+- Sigma         : magnetic substate width σ (0 for perfect alignment)
+- Angular file  : experimental data file (Browse)
+
+Buttons
+-------
+- Run / Compute : runs all physics and updates both plots
+- 1             : show angular distribution view
+- 2             : show chi-squared scan view
+- 3             : close GUI and exit program
+- Redraw        : redraw view
+- Reset Zoom    : reset autoscale
+
+Input File Format
+-----------------
+Experimental angular file must have at least 3 numeric columns:
+
+  theta(deg)   Y   Yerr
+
+Delimiters allowed: comma, spaces, tabs (mixed is OK).
+Lines starting with '#' are comments.
+
+Plot Behavior
+-------------
+- Angular view always displays theta from 0 to π (full domain), regardless of data range.
+- Fit overlay (red) is computed from A0/A2/A4 and drawn across [0, π].
+- Chi2 view displays log(χ²) vs atan(δ).
+
+Terminal Output
+---------------
+Each Run prints:
+- A0, A2, A4 and normalized a2=A2/A0 and a4=A4/A0
+- QD2 and QD4 with the geometry (R,D,T) and energy used
+
+Racah Coefficients
+------------------
+Rk coefficients are computed internally using Wigner 3j/6j (no lookup table is used).
+Selection rule enforced: |j1 - j2| must be an integer (electromagnetic transitions).
+
+Build
+-----
+g++ -std=c++17 AD3.cxx `root-config --cflags --glibs` -lGui -o AD3
+
+If you see ROOT attribute warnings, they are benign; to silence:
+g++ -std=c++17 AD3.cxx `root-config --cflags --glibs` -lGui -Wno-attributes -o AD3
+
+===============================================================
+*/
