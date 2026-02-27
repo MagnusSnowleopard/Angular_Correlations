@@ -326,14 +326,14 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 
 	const double QD2 = QK2(Energy, detradius, targetdistance, detthickness);
 	const double QD4 = QK4(Energy, detradius, targetdistance, detthickness);
-	std::cout << std::fixed << std::setprecision(6)
+	/*	std::cout << std::fixed << std::setprecision(6)
 		<< "[QDK] E_keV=" << Energy
 		<< "  R=" << detradius
 		<< "  D=" << targetdistance
 		<< "  T=" << detthickness
 		<< "  => QD2=" << QD2
 		<< "  QD4=" << QD4 << "\n";
-	// --- Racah coefficients computed from Racah.h ---
+		*/	// --- Racah coefficients computed from Racah.h ---
 	double rk01=0, rk11=0, rk21=0, rk02=0, rk12=0, rk22=0;
 	int Lbase = -1;
 	try {
@@ -358,13 +358,13 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	// Experimental normalized coefficients
 	const double a2E = A2E / A0E;
 	const double a4E = A4E / A0E;
-	std::cout << std::fixed << std::setprecision(6)
+	/*	std::cout << std::fixed << std::setprecision(6)
 		<< "[Legendre Fit] A0=" << A0E
 		<< "  A2=" << A2E
 		<< "  A4=" << A4E
 		<< "   (a2=A2/A0=" << (A2E / A0E)
 		<< ", a4=A4/A0=" << (A4E / A0E) << ")\n";
-	// Chi2 scan setup
+		*/	// Chi2 scan setup
 	const double delta_min = -M_PI/2.0;
 	const double delta_max =  M_PI/2.0;
 	const double step = 0.01;
@@ -481,6 +481,7 @@ int main(int argc, char** argv)
 	// ------------------------------------------------------------
 	while (!gui->ShouldQuitProgram()) {
 		gSystem->ProcessEvents();
+		gui->PollCanvasClick();
 		gSystem->Sleep(20);
 
 		HistoGUIUnifiedRoot::RunRequest req;
