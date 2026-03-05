@@ -15,7 +15,7 @@
 #include <TSystem.h>
 
 #include "Functlib.h"
-#include "QDK.h"
+#include "QDK2.h"
 #include "Cleb.h"
 
 
@@ -438,7 +438,9 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	out.j2 = req.j2;
 	out.gamma_keV = req.gamma_keV;
 	out.sigma = req.sigma;
-
+	out.qd2 = QD2;
+	out.qd4 = QD4; 
+	out.hasQD = std::isfinite(QD2) && std::isfinite(QD4);
 	return true;
 }
 
