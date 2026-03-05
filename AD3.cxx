@@ -423,7 +423,7 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 		chisqr.push_back(std::log(X2_total));
 		tdelta.push_back(atan_delta);
 	}
-
+/*
 	// Estimate delta uncertainty from chi2_min + 1 crossing
 	double bestDelta = 0.0;
 	double bestDeltaErr = 0.0;
@@ -445,7 +445,7 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 			bestDeltaErr = 0.5 * std::fabs(dright - dleft);
 			hasDeltaErr = std::isfinite(bestDeltaErr) && bestDeltaErr > 0.0;
 		}
-	}
+	}*/
 
 	// Prepare normalized angular y for display
 	std::vector<double> ynorm;
@@ -475,9 +475,9 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	out.j2 = req.j2;
 	out.gamma_keV = req.gamma_keV;
 	out.sigma = req.sigma;
-	out.bestDelta = bestDelta;
-	out.bestDeltaErr = bestDeltaErr;
-	out.hasDeltaError = hasDeltaErr;
+//	out.bestDelta = bestDelta;
+//	out.bestDeltaErr = bestDeltaErr;
+//	out.hasDeltaError = hasDeltaErr;
 
 	out.qd2 = QD2;
 	out.qd4 = QD4; 

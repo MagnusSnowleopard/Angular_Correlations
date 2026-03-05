@@ -95,11 +95,11 @@ class HistoGUIUnifiedRoot : public TGMainFrame {
 			std::vector<double> tdelta;    // atan(delta)
 			std::vector<double> chisqr;    // log(chi^2)
 
-			// Best-mix result
+/*			// Best-mix result
 			double bestDelta = 0.0;
 			double bestDeltaErr = 0.0;
 			bool hasDeltaError = false;
-
+*/
 			// Echo inputs
 			double j1 = 0.0;
 			double j2 = 0.0;
@@ -1182,9 +1182,9 @@ inline void HistoGUIUnifiedRoot::UpdateReportBox(const PlotResults& r)
 
 	if (fHasBestChi2) {
 		os << "  Best   : atan(delta) = " << fLastBestAtanDelta << " rad\n";
-		os << "  Best   : atan(delta) = " << fLastBestAtanDelta << " rad"
-		   << "   delta = " << r.bestDelta;
-		if (r.hasDeltaError) os << " +/- " << r.bestDeltaErr;
+//		os << "  Best   : atan(delta) = " << fLastBestAtanDelta << " rad";
+//		   << "   delta = " << r.bestDelta;
+//		if (r.hasDeltaError) os << " +/- " << r.bestDeltaErr;
 		os << "\n";
 	} else {
 	}
@@ -1231,11 +1231,11 @@ inline void HistoGUIUnifiedRoot::PrintRunSummaryToTerminal(const PlotResults& r)
 	if (fHasBestChi2) {
 		std::printf(" Chi2 minimum:\n");
 		std::printf("   atan(delta)_min = %.6f rad\n", fLastBestAtanDelta);
-		if (r.hasDeltaError) {
+/*		if (r.hasDeltaError) {
 			std::printf("   delta_min = %.6f +/- %.6f\n", r.bestDelta, r.bestDeltaErr);
 		} else {
 			std::printf("   delta_min = %.6f\n", r.bestDelta);
-		}
+		}*/
 	} else {
 		std::printf(" Chi2 minimum:\n");
 		std::printf("   n/a\n");
