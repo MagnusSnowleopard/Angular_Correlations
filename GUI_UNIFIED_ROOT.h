@@ -1181,6 +1181,7 @@ inline void HistoGUIUnifiedRoot::UpdateReportBox(const PlotResults& r)
 	os << "\n";
 
 	if (fHasBestChi2) {
+		os << "  Best   : atan(delta) = " << fLastBestAtanDelta << " rad\n";
 		os << "  Best   : atan(delta) = " << fLastBestAtanDelta << " rad"
 		   << "   delta = " << r.bestDelta;
 		if (r.hasDeltaError) os << " +/- " << r.bestDeltaErr;
