@@ -488,7 +488,7 @@ inline void HistoGUIUnifiedRoot::BuildGUI()
 	fRowReport = new TGHorizontalFrame(fMainV);
 	fReportView = new TGTextView(fRowReport, 1200, 120);
 	fReportView->LoadBuffer(
-			"Run summary:\n"
+			"\n Run summary:\n"
 			"  No results yet.\n"
 			);
 	fRowReport->AddFrame(fReportView, new TGLayoutHints(kLHintsExpandX, 6, 6, 2, 4));
@@ -1165,6 +1165,7 @@ inline void HistoGUIUnifiedRoot::UpdateReportBox(const PlotResults& r)
 
 	std::ostringstream os;
 	os << std::fixed << std::setprecision(6);
+	os << "\n";
 	os << "Run summary\n";
 	os << "  Inputs : E_gamma = " << Eg << " keV"
 		<< "   j1 = " << j1v
