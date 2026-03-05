@@ -109,7 +109,7 @@ class HistoGUIUnifiedRoot : public TGMainFrame {
 			// Detector attenuation coeffs
 			double qd2 = 0.0;
 			double qd4 = 0.0;
-			bool hasQD = false;
+			bool hasQD = true;
 		};
 
 	public:
@@ -796,7 +796,7 @@ inline void HistoGUIUnifiedRoot::LoadResults(const PlotResults& r)
 
 	fLastQD2 = r.qd2;
 	fLastQD4 = r.qd4;
-	fHasQD   = r.hasQD && std::isfinite(fLastQD2) && std::isfinite(fLastQD4);
+	fHasQD   = std::isfinite(fLastQD2) && std::isfinite(fLastQD4);
 	// Chi2 minimum
 	fHasBestChi2 = false;
 	fLastBestAtanDelta = 0.0;
@@ -1185,6 +1185,7 @@ inline void HistoGUIUnifiedRoot::UpdateReportBox(const PlotResults& r)
 		   << "   delta = " << r.bestDelta;
 		if (r.hasDeltaError) os << " +/- " << r.bestDeltaErr;
 		os << "\n";
+	} else {
 	}
 
 	if (fHasQD) {

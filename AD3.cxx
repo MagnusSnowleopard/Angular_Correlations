@@ -424,7 +424,6 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 		tdelta.push_back(atan_delta);
 	}
 
-
 	// Estimate delta uncertainty from chi2_min + 1 crossing
 	double bestDelta = 0.0;
 	double bestDeltaErr = 0.0;
@@ -479,9 +478,6 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	out.bestDelta = bestDelta;
 	out.bestDeltaErr = bestDeltaErr;
 	out.hasDeltaError = hasDeltaErr;
-	out.qd2 = QD2;
-	out.qd4 = QD4;
-	out.hasQD = std::isfinite(QD2) && std::isfinite(QD4);
 
 	return true;
 }
