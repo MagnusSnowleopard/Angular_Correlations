@@ -117,15 +117,19 @@ static bool LoadAngularExperimentalFile(const std::string& filename,
 // --------------------------
 static bool FitLegendreA0A2A4(const std::vector<double>& theta_rad,
 		const std::vector<double>& y,
+		const std::vector<double>& ey,
 		double& A0, double& A2, double& A4,
+		double& a2, double& a4,
+		double& a2Err, double& a4Err,
 		std::string& err)
 {
-	if (theta_rad.size() < 3 || theta_rad.size() != y.size()) {
+	if (theta_rad.size() < 3 || theta_rad.size() != y.size() || y.size() != ey.size()) {
 		err = "Not enough angular points for A0/A2/A4 fit.";
 		return false;
 	}
 
-	double a1=0.,a2=0.,a3=0.,a4s=0.,a5=0.,a6=0.,a7=0.,a8=0.,a9=0.,a10=0.,a11=0.,a12=0.;
+	double M[3][3] = {{0.,0.,0.},{0.,0.,0.},{0.,0.,0.}};
+	double b[3] = {0.,0.,0.};
 
 	for (size_t i = 0; i < theta_rad.size(); ++i) {
 		const double th = theta_rad[i];
@@ -135,68 +139,71 @@ static bool FitLegendreA0A2A4(const std::vector<double>& theta_rad,
 
 		const double P2 = (1.5*c2 - 0.5);
 		const double P4 = (35.0/8.0*c4 - 30.0/8.0*c2 + 3.0/8.0);
+		const double f[3] = {1.0, P2, P4};
 
-		a1  += 1.0;
-		a2  += P2;
-		a3  += P4;
-		a4s += y[i];
+		double w = 1.0;
+		if (ey[i] > 0.0 && std::isfinite(ey[i])) w = 1.0/(ey[i]*ey[i]);
 
-		a5  += P2;
-		a6  += P2*P2;
-		a7  += P2*P4;
-		a8  += P2*y[i];
-
-		a9  += P4;
-		a10 += P2*P4;
-		a11 += P4*P4;
-		a12 += P4*y[i];
+		for (int r = 0; r < 3; ++r) {
+			b[r] += w * f[r] * y[i];
+			for (int cidx = 0; cidx < 3; ++cidx) M[r][cidx] += w * f[r] * f[cidx];
+		}
 	}
 
-	double mat[3][4] = {
-		{a1,  a2,  a3,  a4s},
-		{a5,  a6,  a7,  a8 },
-		{a9,  a10, a11, a12}
+	double Aaug[3][6] = {
+		{M[0][0], M[0][1], M[0][2], 1.0, 0.0, 0.0},
+		{M[1][0], M[1][1], M[1][2], 0.0, 1.0, 0.0},
+		{M[2][0], M[2][1], M[2][2], 0.0, 0.0, 1.0}
 	};
 
-	// partial pivot
 	for (int i = 0; i < 3; ++i) {
 		int piv = i;
-		for (int r = i+1; r < 3; ++r) {
-			if (std::fabs(mat[r][i]) > std::fabs(mat[piv][i])) piv = r;
-		}
-		if (piv != i) {
-			for (int k = 0; k < 4; ++k) std::swap(mat[i][k], mat[piv][k]);
-		}
-		if (std::fabs(mat[i][i]) < 1e-18) {
+		for (int r = i+1; r < 3; ++r) if (std::fabs(Aaug[r][i]) > std::fabs(Aaug[piv][i])) piv = r;
+		if (piv != i) for (int k = 0; k < 6; ++k) std::swap(Aaug[i][k], Aaug[piv][k]);
+		if (std::fabs(Aaug[i][i]) < 1e-18) {
 			err = "Singular normal-equation matrix in Legendre fit (check input angles).";
 			return false;
 		}
-	}
-
-	// elimination
-	for (int i = 0; i < 2; ++i) {
-		for (int r = i+1; r < 3; ++r) {
-			double f = mat[r][i] / mat[i][i];
-			for (int k = i; k < 4; ++k) mat[r][k] -= f*mat[i][k];
+		double diag = Aaug[i][i];
+		for (int k = 0; k < 6; ++k) Aaug[i][k] /= diag;
+		for (int r = 0; r < 3; ++r) {
+			if (r == i) continue;
+			double f = Aaug[r][i];
+			for (int k = 0; k < 6; ++k) Aaug[r][k] -= f * Aaug[i][k];
 		}
 	}
 
-	// back-sub
-	double x[3] = {0.,0.,0.};
-	for (int i = 2; i >= 0; --i) {
-		double s = mat[i][3];
-		for (int j = i+1; j < 3; ++j) s -= mat[i][j]*x[j];
-		x[i] = s / mat[i][i];
-	}
+	double Minv[3][3] = {
+		{Aaug[0][3], Aaug[0][4], Aaug[0][5]},
+		{Aaug[1][3], Aaug[1][4], Aaug[1][5]},
+		{Aaug[2][3], Aaug[2][4], Aaug[2][5]}
+	};
 
-	A0 = x[0];
-	A2 = x[1];
-	A4 = x[2];
+	A0 = Minv[0][0]*b[0] + Minv[0][1]*b[1] + Minv[0][2]*b[2];
+	A2 = Minv[1][0]*b[0] + Minv[1][1]*b[1] + Minv[1][2]*b[2];
+	A4 = Minv[2][0]*b[0] + Minv[2][1]*b[1] + Minv[2][2]*b[2];
 
 	if (std::fabs(A0) < 1e-18) {
 		err = "Fit returned A0 ~ 0 (cannot normalize).";
 		return false;
 	}
+
+	a2 = A2 / A0;
+	a4 = A4 / A0;
+
+	const double varA0 = Minv[0][0];
+	const double varA2 = Minv[1][1];
+	const double varA4 = Minv[2][2];
+	const double covA0A2 = Minv[0][1];
+	const double covA0A4 = Minv[0][2];
+
+	const double A0sq = A0*A0;
+	const double A0cu = A0sq*A0;
+	const double var_a2 = varA2/A0sq + (A2*A2)*varA0/(A0sq*A0sq) - 2.0*A2*covA0A2/A0cu;
+	const double var_a4 = varA4/A0sq + (A4*A4)*varA0/(A0sq*A0sq) - 2.0*A4*covA0A4/A0cu;
+
+	a2Err = (var_a2 > 0.0 && std::isfinite(var_a2)) ? std::sqrt(var_a2) : 0.0;
+	a4Err = (var_a4 > 0.0 && std::isfinite(var_a4)) ? std::sqrt(var_a4) : 0.0;
 
 	return true;
 }
@@ -311,9 +318,10 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 		return false;
 	}
 
-	// Fit Legendre to experimental data -> A0,A2,A4
+	// Fit Legendre to experimental data -> A0,A2,A4 and normalized a2,a4
 	double A0E=1.0, A2E=0.0, A4E=0.0;
-	if (!FitLegendreA0A2A4(theta_rad, yraw, A0E, A2E, A4E, err)) {
+	double a2E=0.0, a4E=0.0, a2Err=0.0, a4Err=0.0;
+	if (!FitLegendreA0A2A4(theta_rad, yraw, eyraw, A0E, A2E, A4E, a2E, a4E, a2Err, a4Err, err)) {
 		return false;
 	}
 
@@ -355,9 +363,7 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	}
 	ComputeBk(req.j1, req.sigma, Bk11, Bk12);
 
-	// Experimental normalized coefficients
-	const double a2E = A2E / A0E;
-	const double a4E = A4E / A0E;
+	// Experimental normalized coefficients were computed in the fit stage
 	/*	std::cout << std::fixed << std::setprecision(6)
 		<< "[Legendre Fit] A0=" << A0E
 		<< "  A2=" << A2E
@@ -372,8 +378,10 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	const int points = (int)((delta_max - delta_min)/step);
 
 	std::vector<double> chisqr;
+	std::vector<double> chi2raw;
 	std::vector<double> tdelta;
 	chisqr.reserve(points);
+	chi2raw.reserve(points);
 	tdelta.reserve(points);
 
 	// Chi2 scan comparing theory vs experimental-fit curve (legacy style)
@@ -411,8 +419,32 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 		}
 
 		if (X2_total <= 0.0) X2_total = 1e-30; // avoid log(0)
+		chi2raw.push_back(X2_total);
 		chisqr.push_back(std::log(X2_total));
 		tdelta.push_back(atan_delta);
+	}
+
+	// Estimate delta uncertainty from chi2_min + 1 crossing
+	double bestDelta = 0.0;
+	double bestDeltaErr = 0.0;
+	bool hasDeltaErr = false;
+	if (!chi2raw.empty() && chi2raw.size() == tdelta.size()) {
+		size_t imin = 0;
+		for (size_t i = 1; i < chi2raw.size(); ++i) if (chi2raw[i] < chi2raw[imin]) imin = i;
+		bestDelta = std::tan(tdelta[imin]);
+		const double target = chi2raw[imin] + 1.0;
+
+		int ileft = (int)imin;
+		while (ileft > 0 && chi2raw[(size_t)ileft] <= target) --ileft;
+		int iright = (int)imin;
+		while (iright + 1 < (int)chi2raw.size() && chi2raw[(size_t)iright] <= target) ++iright;
+
+		if (ileft < (int)imin && iright > (int)imin && ileft >= 0 && iright < (int)tdelta.size()) {
+			const double dleft = std::tan(tdelta[(size_t)ileft]);
+			const double dright = std::tan(tdelta[(size_t)iright]);
+			bestDeltaErr = 0.5 * std::fabs(dright - dleft);
+			hasDeltaErr = std::isfinite(bestDeltaErr) && bestDeltaErr > 0.0;
+		}
 	}
 
 	// Prepare normalized angular y for display
@@ -429,7 +461,12 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	out.fitA0 = A0E;
 	out.fitA2 = A2E;
 	out.fitA4 = A4E;
+	out.a2 = a2E;
+	out.a4 = a4E;
+	out.a2Err = a2Err;
+	out.a4Err = a4Err;
 	out.hasFit = true;
+	out.hasCoeffErrors = std::isfinite(a2Err) && std::isfinite(a4Err) && (a2Err > 0.0 || a4Err > 0.0);
 
 	out.tdelta = tdelta;
 	out.chisqr = chisqr;
@@ -438,6 +475,10 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	out.j2 = req.j2;
 	out.gamma_keV = req.gamma_keV;
 	out.sigma = req.sigma;
+	out.bestDelta = bestDelta;
+	out.bestDeltaErr = bestDeltaErr;
+	out.hasDeltaError = hasDeltaErr;
+
 	out.qd2 = QD2;
 	out.qd4 = QD4; 
 	out.hasQD = std::isfinite(QD2) && std::isfinite(QD4);
