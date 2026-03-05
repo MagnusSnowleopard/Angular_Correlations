@@ -1,6 +1,6 @@
 # Angular_Correlations
 
-# This program is under construction in order to replace a fortran 77 angular distribution/ mixing ratio determination calculator used a FSU's Nuclear Accelerator laboratory. 
+# This program is a replacement a fortran 77 angular distribution/ mixing ratio determination calculator used a FSU's Nuclear Accelerator laboratory. 
 
 # Reading in detector width, radius, distance from the radiative source, and the gamma-ray energy of interest, the program calculates the QDk geometric attenuation coefficients. 
 
