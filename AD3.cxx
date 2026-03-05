@@ -15,7 +15,7 @@
 #include <TSystem.h>
 
 #include "Functlib.h"
-#include "QDK.h"
+#include "QDK2.h"
 #include "Cleb.h"
 
 
@@ -378,8 +378,10 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	const int points = (int)((delta_max - delta_min)/step);
 
 	std::vector<double> chisqr;
+	std::vector<double> chi2raw;
 	std::vector<double> tdelta;
 	chisqr.reserve(points);
+	chi2raw.reserve(points);
 	tdelta.reserve(points);
 
 	// Chi2 scan comparing theory vs experimental-fit curve (legacy style)
@@ -417,10 +419,33 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 		}
 
 		if (X2_total <= 0.0) X2_total = 1e-30; // avoid log(0)
+		chi2raw.push_back(X2_total);
 		chisqr.push_back(std::log(X2_total));
 		tdelta.push_back(atan_delta);
 	}
 
+	// Estimate delta uncertainty from chi2_min + 1 crossing
+	double bestDelta = 0.0;
+	double bestDeltaErr = 0.0;
+	bool hasDeltaErr = false;
+	if (!chi2raw.empty() && chi2raw.size() == tdelta.size()) {
+		size_t imin = 0;
+		for (size_t i = 1; i < chi2raw.size(); ++i) if (chi2raw[i] < chi2raw[imin]) imin = i;
+		bestDelta = std::tan(tdelta[imin]);
+		const double target = chi2raw[imin] + 1.0;
+
+		int ileft = (int)imin;
+		while (ileft > 0 && chi2raw[(size_t)ileft] <= target) --ileft;
+		int iright = (int)imin;
+		while (iright + 1 < (int)chi2raw.size() && chi2raw[(size_t)iright] <= target) ++iright;
+
+		if (ileft < (int)imin && iright > (int)imin && ileft >= 0 && iright < (int)tdelta.size()) {
+			const double dleft = std::tan(tdelta[(size_t)ileft]);
+			const double dright = std::tan(tdelta[(size_t)iright]);
+			bestDeltaErr = 0.5 * std::fabs(dright - dleft);
+			hasDeltaErr = std::isfinite(bestDeltaErr) && bestDeltaErr > 0.0;
+		}
+	}
 
 	// Prepare normalized angular y for display
 	std::vector<double> ynorm;
@@ -450,7 +475,13 @@ static bool RunADComputation(const HistoGUIUnifiedRoot::RunRequest& req,
 	out.j2 = req.j2;
 	out.gamma_keV = req.gamma_keV;
 	out.sigma = req.sigma;
+	out.bestDelta = bestDelta;
+	out.bestDeltaErr = bestDeltaErr;
+	out.hasDeltaError = hasDeltaErr;
 
+	out.qd2 = QD2;
+	out.qd4 = QD4; 
+	out.hasQD = std::isfinite(QD2) && std::isfinite(QD4);
 	return true;
 }
 
