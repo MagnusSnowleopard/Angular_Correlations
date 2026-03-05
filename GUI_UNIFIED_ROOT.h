@@ -84,11 +84,17 @@ class HistoGUIUnifiedRoot : public TGMainFrame {
 			double fitA0 = 1.0;
 			double fitA2 = 0.0;
 			double fitA4 = 0.0;
+			double a2 = 0.0;
+			double a4 = 0.0;
+			double a2Err = 0.0;
+			double a4Err = 0.0;
 			bool hasFit = false;
+			bool hasCoeffErrors = false;
 
 			// Chi2 scan
 			std::vector<double> tdelta;    // atan(delta)
 			std::vector<double> chisqr;    // log(chi^2)
+
 
 			// Echo inputs
 			double j1 = 0.0;
@@ -1164,10 +1170,14 @@ inline void HistoGUIUnifiedRoot::UpdateReportBox(const PlotResults& r)
 	os << "  Fit    : A0 = " << A0
 		<< "   A2 = " << A2E
 		<< "   A4 = " << A4E << "\n";
+	os << "  Coeff  : a2 = " << r.a2;
+	if (r.hasCoeffErrors) os << " +/- " << r.a2Err;
+	os << "   a4 = " << r.a4;
+	if (r.hasCoeffErrors) os << " +/- " << r.a4Err;
+	os << "\n";
 
 	if (fHasBestChi2) {
-		os << "  Best   : atan(delta) = " << fLastBestAtanDelta << " rad";
-	} else {
+		os << "  Best   : atan(delta) = " << fLastBestAtanDelta << " rad\n";
 	}
 
 	if (fHasQD) {
@@ -1201,6 +1211,13 @@ inline void HistoGUIUnifiedRoot::PrintRunSummaryToTerminal(const PlotResults& r)
 	std::printf("   A0 = %.6f\n", A0);
 	std::printf("   A2 = %.6f\n", A2E);
 	std::printf("   A4 = %.6f\n", A4E);
+	if (r.hasCoeffErrors) {
+		std::printf("   a2 = %.6f +/- %.6f\n", r.a2, r.a2Err);
+		std::printf("   a4 = %.6f +/- %.6f\n", r.a4, r.a4Err);
+	} else {
+		std::printf("   a2 = %.6f\n", r.a2);
+		std::printf("   a4 = %.6f\n", r.a4);
+	}
 
 	if (fHasBestChi2) {
 		std::printf(" Chi2 minimum:\n");
