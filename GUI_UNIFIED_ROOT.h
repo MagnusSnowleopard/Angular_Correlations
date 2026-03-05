@@ -109,7 +109,7 @@ class HistoGUIUnifiedRoot : public TGMainFrame {
 			// Detector attenuation coeffs
 			double qd2 = 0.0;
 			double qd4 = 0.0;
-			bool hasQD = true;
+			bool hasQD = false;
 		};
 
 	public:
