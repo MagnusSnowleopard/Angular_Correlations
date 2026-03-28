@@ -29,9 +29,11 @@
 #include <vector>
 #include <limits>
 #include <iomanip>
+#include <fstream>
 
 // ROOT core/graphics
 #include <TCanvas.h>
+#include <TFile.h>
 #include <TGraph.h>
 #include <TGraphErrors.h>
 #include <TAxis.h>
@@ -166,6 +168,7 @@ class HistoGUIUnifiedRoot : public TGMainFrame {
 			kID_Mode1        = 1101,
 			kID_Mode2        = 1102,
 			kID_Mode3Close   = 1103,
+			kID_SaveOutput   = 1104,
 
 			kID_Redraw       = 1110,
 			kID_Reset        = 1111
@@ -197,6 +200,11 @@ class HistoGUIUnifiedRoot : public TGMainFrame {
 		void ApplyUIFont();
 		void UpdateReportBox(const PlotResults& r);
 		void PrintRunSummaryToTerminal(const PlotResults& r) const;
+		void SaveCurrentOutput();
+		bool SaveCurrentViewAsCSV(const std::string& outPath) const;
+		bool SaveCurrentViewAsRootFile(const std::string& outPath) const;
+		static std::string ToLowerCopy(const std::string& s);
+		static std::string GetExtensionLower(const std::string& path);
 
 		void ClearCrosshair();
 		void DrawCrosshairOverlay();
@@ -234,6 +242,7 @@ class HistoGUIUnifiedRoot : public TGMainFrame {
 		TGTextButton*        fBtnMode1;
 		TGTextButton*        fBtnMode2;
 		TGTextButton*        fBtnMode3;
+		TGTextButton*        fBtnSaveOutput;
 		TGTextButton*        fBtnRedraw;
 		TGTextButton*        fBtnReset;
 
@@ -341,6 +350,7 @@ inline HistoGUIUnifiedRoot::HistoGUIUnifiedRoot(const TGWindow* p, UInt_t w, UIn
 	fEntJ1(nullptr), fEntJ2(nullptr), fEntEg(nullptr), fEntSigma(nullptr),
 	fLblDataFile(nullptr), fEntDataFile(nullptr), fBtnBrowseData(nullptr), fBtnRun(nullptr),
 	fBtnMode1(nullptr), fBtnMode2(nullptr), fBtnMode3(nullptr),
+	fBtnSaveOutput(nullptr),
 	fBtnRedraw(nullptr), fBtnReset(nullptr),
 	fReportView(nullptr),
 	fLblStatus(nullptr),
@@ -467,6 +477,7 @@ inline void HistoGUIUnifiedRoot::BuildGUI()
 	fBtnMode1  = new TGTextButton(fRowButtons, "1", kID_Mode1);
 	fBtnMode2  = new TGTextButton(fRowButtons, "2", kID_Mode2);
 	fBtnMode3  = new TGTextButton(fRowButtons, "3", kID_Mode3Close);
+	fBtnSaveOutput = new TGTextButton(fRowButtons, "Save Output", kID_SaveOutput);
 
 	fBtnRedraw = new TGTextButton(fRowButtons, "Redraw", kID_Redraw);
 	fBtnReset  = new TGTextButton(fRowButtons, "Reset Zoom", kID_Reset);
@@ -474,12 +485,14 @@ inline void HistoGUIUnifiedRoot::BuildGUI()
 	fBtnMode1->Associate(this);
 	fBtnMode2->Associate(this);
 	fBtnMode3->Associate(this);
+	fBtnSaveOutput->Associate(this);
 	fBtnRedraw->Associate(this);
 	fBtnReset->Associate(this);
 
 	fRowButtons->AddFrame(fBtnMode1,  new TGLayoutHints(kLHintsLeft | kLHintsCenterY, 6, 2, 4, 4));
 	fRowButtons->AddFrame(fBtnMode2,  new TGLayoutHints(kLHintsLeft | kLHintsCenterY, 2, 2, 4, 4));
-	fRowButtons->AddFrame(fBtnMode3,  new TGLayoutHints(kLHintsLeft | kLHintsCenterY, 2, 12, 4, 4));
+	fRowButtons->AddFrame(fBtnMode3,  new TGLayoutHints(kLHintsLeft | kLHintsCenterY, 2, 8, 4, 4));
+	fRowButtons->AddFrame(fBtnSaveOutput,  new TGLayoutHints(kLHintsLeft | kLHintsCenterY, 2, 12, 4, 4));
 	fRowButtons->AddFrame(fBtnRedraw, new TGLayoutHints(kLHintsLeft | kLHintsCenterY, 2, 4, 4, 4));
 	fRowButtons->AddFrame(fBtnReset,  new TGLayoutHints(kLHintsLeft | kLHintsCenterY, 2, 4, 4, 4));
 	fRowButtons->AddFrame(new TGLabel(fRowButtons, " "), new TGLayoutHints(kLHintsExpandX));
@@ -552,6 +565,7 @@ inline void HistoGUIUnifiedRoot::ApplyUIFont()
 	if (fBtnMode1)      fBtnMode1->SetFont(fUIFont, kFALSE);
 	if (fBtnMode2)      fBtnMode2->SetFont(fUIFont, kFALSE);
 	if (fBtnMode3)      fBtnMode3->SetFont(fUIFont, kFALSE);
+	if (fBtnSaveOutput) fBtnSaveOutput->SetFont(fUIFont, kFALSE);
 	if (fBtnRedraw)     fBtnRedraw->SetFont(fUIFont, kFALSE);
 	if (fBtnReset)      fBtnReset->SetFont(fUIFont, kFALSE);
 
@@ -578,9 +592,10 @@ inline void HistoGUIUnifiedRoot::ApplyUIFont()
 	if (fBtnBrowseData)  fBtnBrowseData->Resize(110, 32);
 	if (fBtnRun)         fBtnRun->Resize(170, 32);
 
-	if (fBtnMode1)       fBtnMode1->Resize(50, 32);
-	if (fBtnMode2)       fBtnMode2->Resize(50, 32);
-	if (fBtnMode3)       fBtnMode3->Resize(50, 32);
+	if (fBtnMode1)       fBtnMode1->Resize(65, 32);
+	if (fBtnMode2)       fBtnMode2->Resize(70, 32);
+	if (fBtnMode3)       fBtnMode3->Resize(65, 32);
+	if (fBtnSaveOutput)  fBtnSaveOutput->Resize(150, 32);
 	if (fBtnRedraw)      fBtnRedraw->Resize(110, 32);
 	if (fBtnReset)       fBtnReset->Resize(130, 32);
 
@@ -602,9 +617,9 @@ inline void HistoGUIUnifiedRoot::ApplyPadMargins()
 
 inline void HistoGUIUnifiedRoot::UpdateModeButtonStates()
 {
-	if (fBtnMode1) fBtnMode1->SetText(fViewMode == kViewAngular ? "[1]" : "1");
-	if (fBtnMode2) fBtnMode2->SetText(fViewMode == kViewChi2    ? "[2]" : "2");
-	if (fBtnMode3) fBtnMode3->SetText("3");
+	if (fBtnMode1) fBtnMode1->SetText(fViewMode == kViewAngular ? "[AD]" : "AD");
+	if (fBtnMode2) fBtnMode2->SetText(fViewMode == kViewChi2    ? "[Chi2]" : "Chi2");
+	if (fBtnMode3) fBtnMode3->SetText("Exit");
 }
 
 inline void HistoGUIUnifiedRoot::UpdateWindowTitle()
@@ -1200,6 +1215,137 @@ inline void HistoGUIUnifiedRoot::UpdateReportBox(const PlotResults& r)
 	fReportView->LoadBuffer(os.str().c_str());
 }
 
+inline std::string HistoGUIUnifiedRoot::ToLowerCopy(const std::string& s)
+{
+	std::string out = s;
+	std::transform(out.begin(), out.end(), out.begin(),
+			[](unsigned char c){ return (char)std::tolower(c); });
+	return out;
+}
+
+inline std::string HistoGUIUnifiedRoot::GetExtensionLower(const std::string& path)
+{
+	const std::string::size_type dot = path.find_last_of('.');
+	if (dot == std::string::npos || dot + 1 >= path.size()) return std::string();
+	return ToLowerCopy(path.substr(dot + 1));
+}
+
+inline bool HistoGUIUnifiedRoot::SaveCurrentViewAsCSV(const std::string& outPath) const
+{
+	std::ofstream ofs(outPath.c_str());
+	if (!ofs.is_open()) return false;
+
+	ofs << std::fixed << std::setprecision(8);
+	if (fViewMode == kViewAngular) {
+		if (!HasAngularData()) return false;
+		ofs << "theta_deg,y,yerr\n";
+		for (size_t i = 0; i < fAngX.size(); ++i) {
+			const double ey = (i < fAngEY.size()) ? fAngEY[i] : 0.0;
+			ofs << fAngX[i] << "," << fAngY[i] << "," << ey << "\n";
+		}
+	} else if (fViewMode == kViewChi2) {
+		if (!HasChi2Data()) return false;
+		ofs << "atan_delta_rad,log_chi2\n";
+		for (size_t i = 0; i < fChi2X.size() && i < fChi2Y.size(); ++i) {
+			ofs << fChi2X[i] << "," << fChi2Y[i] << "\n";
+		}
+	} else {
+		return false;
+	}
+
+	return ofs.good();
+}
+
+inline bool HistoGUIUnifiedRoot::SaveCurrentViewAsRootFile(const std::string& outPath) const
+{
+	if (fViewMode == kViewAngular && !HasAngularData()) return false;
+	if (fViewMode == kViewChi2 && !HasChi2Data()) return false;
+	if (!fECanvas || !fECanvas->GetCanvas()) return false;
+
+	TFile fout(outPath.c_str(), "RECREATE");
+	if (!fout.IsOpen() || fout.IsZombie()) return false;
+
+	TCanvas* src = fECanvas->GetCanvas();
+	if (!src) return false;
+	TCanvas* saved = (TCanvas*)src->Clone(fViewMode == kViewAngular ? "ad_canvas" : "chi2_canvas");
+	if (!saved) return false;
+	saved->Write();
+	delete saved;
+
+	fout.Close();
+	return true;
+}
+
+inline void HistoGUIUnifiedRoot::SaveCurrentOutput()
+{
+	if (fViewMode == kViewAngular && !HasAngularData()) {
+		SetStatus("No AD output available. Run compute first.");
+		return;
+	}
+	if (fViewMode == kViewChi2 && !HasChi2Data()) {
+		SetStatus("No Chi2 output available. Run compute first.");
+		return;
+	}
+
+	static TString dir(".");
+	TGFileInfo fi;
+	const char* filetypes[] = {
+		"PNG image",      "*.png",
+		"PDF document",   "*.pdf",
+		"CSV data",       "*.csv",
+		"TGraph ROOT file","*.root *.tgraph",
+		"All files",      "*",
+		nullptr, nullptr
+	};
+	fi.fFileTypes = filetypes;
+	fi.fIniDir = StrDup(dir.Data());
+
+	new TGFileDialog(gClient->GetRoot(), this, kFDSave, &fi);
+	if (!fi.fFilename) {
+		SetStatus("Save output cancelled.");
+		return;
+	}
+	if (fi.fIniDir) dir = fi.fIniDir;
+
+	std::string outPath(fi.fFilename);
+	std::string ext = GetExtensionLower(outPath);
+	if (ext.empty()) {
+		switch (fi.fFileTypeIdx) {
+			case 0: outPath += ".png";    break;
+			case 1: outPath += ".pdf";    break;
+			case 2: outPath += ".csv";    break;
+			case 3: outPath += ".root";   break;
+			default: outPath += ".root";  break;
+		}
+		ext = GetExtensionLower(outPath);
+	}
+	bool ok = false;
+
+	if (ext == "png" || ext == "pdf") {
+		if (!fECanvas || !fECanvas->GetCanvas()) {
+			SetStatus("Canvas unavailable for save.");
+			return;
+		}
+		DrawCurrentView(false);
+		fECanvas->GetCanvas()->SaveAs(outPath.c_str());
+		ok = (gSystem && gSystem->AccessPathName(outPath.c_str()) == 0);
+	} else if (ext == "csv") {
+		ok = SaveCurrentViewAsCSV(outPath);
+	} else if (ext == "root" || ext == "tgraph") {
+		DrawCurrentView(false);
+		ok = SaveCurrentViewAsRootFile(outPath);
+	} else {
+		SetStatus("Unsupported extension. Use .csv, .root/.tgraph, .pdf, or .png");
+		return;
+	}
+
+	if (ok) {
+		SetStatus(std::string("Saved output: ") + outPath);
+	} else {
+		SetStatus(std::string("Failed to save output: ") + outPath);
+	}
+}
+
 
 inline void HistoGUIUnifiedRoot::PrintRunSummaryToTerminal(const PlotResults& r) const
 {
@@ -1419,6 +1565,10 @@ inline Bool_t HistoGUIUnifiedRoot::ProcessMessage(Longptr_t msg, Longptr_t parm1
 									     Close();
 									     break;
 								     }
+						case kID_SaveOutput: {
+									 SaveCurrentOutput();
+									 break;
+								 }
 
 						case kID_Redraw: {
 									 Redraw();
