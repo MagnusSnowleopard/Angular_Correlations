@@ -202,7 +202,7 @@ class HistoGUIUnifiedRoot : public TGMainFrame {
 		void PrintRunSummaryToTerminal(const PlotResults& r) const;
 		void SaveCurrentOutput();
 		bool SaveCurrentViewAsCSV(const std::string& outPath) const;
-		bool SaveCurrentViewAsRootFile(const std::string& outPath) const;
+		bool SaveCurrentViewAsTGraphFile(const std::string& outPath) const;
 		static std::string ToLowerCopy(const std::string& s);
 		static std::string GetExtensionLower(const std::string& path);
 
@@ -1256,21 +1256,32 @@ inline bool HistoGUIUnifiedRoot::SaveCurrentViewAsCSV(const std::string& outPath
 	return ofs.good();
 }
 
-inline bool HistoGUIUnifiedRoot::SaveCurrentViewAsRootFile(const std::string& outPath) const
+inline bool HistoGUIUnifiedRoot::SaveCurrentViewAsTGraphFile(const std::string& outPath) const
 {
 	if (fViewMode == kViewAngular && !HasAngularData()) return false;
 	if (fViewMode == kViewChi2 && !HasChi2Data()) return false;
-	if (!fECanvas || !fECanvas->GetCanvas()) return false;
 
 	TFile fout(outPath.c_str(), "RECREATE");
 	if (!fout.IsOpen() || fout.IsZombie()) return false;
 
-	TCanvas* src = fECanvas->GetCanvas();
-	if (!src) return false;
-	TCanvas* saved = (TCanvas*)src->Clone(fViewMode == kViewAngular ? "ad_canvas" : "chi2_canvas");
-	if (!saved) return false;
-	saved->Write();
-	delete saved;
+	if (fViewMode == kViewAngular) {
+		if (fGraphAngular) {
+			TGraphErrors* gData = (TGraphErrors*)fGraphAngular->Clone("angular_data");
+			gData->Write();
+			delete gData;
+		}
+		if (fGraphAngFit) {
+			TGraph* gFit = (TGraph*)fGraphAngFit->Clone("angular_fit");
+			gFit->Write();
+			delete gFit;
+		}
+	} else {
+		if (fGraphChi2) {
+			TGraph* gChi2 = (TGraph*)fGraphChi2->Clone("chi2_scan");
+			gChi2->Write();
+			delete gChi2;
+		}
+	}
 
 	fout.Close();
 	return true;
@@ -1308,17 +1319,7 @@ inline void HistoGUIUnifiedRoot::SaveCurrentOutput()
 	if (fi.fIniDir) dir = fi.fIniDir;
 
 	std::string outPath(fi.fFilename);
-	std::string ext = GetExtensionLower(outPath);
-	if (ext.empty()) {
-		switch (fi.fFileTypeIdx) {
-			case 0: outPath += ".png";    break;
-			case 1: outPath += ".pdf";    break;
-			case 2: outPath += ".csv";    break;
-			case 3: outPath += ".root";   break;
-			default: outPath += ".root";  break;
-		}
-		ext = GetExtensionLower(outPath);
-	}
+	const std::string ext = GetExtensionLower(outPath);
 	bool ok = false;
 
 	if (ext == "png" || ext == "pdf") {
@@ -1332,8 +1333,7 @@ inline void HistoGUIUnifiedRoot::SaveCurrentOutput()
 	} else if (ext == "csv") {
 		ok = SaveCurrentViewAsCSV(outPath);
 	} else if (ext == "root" || ext == "tgraph") {
-		DrawCurrentView(false);
-		ok = SaveCurrentViewAsRootFile(outPath);
+		ok = SaveCurrentViewAsTGraphFile(outPath);
 	} else {
 		SetStatus("Unsupported extension. Use .csv, .root/.tgraph, .pdf, or .png");
 		return;
