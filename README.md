@@ -28,9 +28,10 @@ GUI Inputs (user-editable)
 Buttons
 -------
 - Run / Compute : runs all physics and updates both plots
-- 1             : show angular distribution view
-- 2             : show chi-squared scan view
-- 3             : close GUI and exit program
+- AD            : show angular distribution view
+- Chi2          : show chi-squared scan view
+- Exit          : close GUI and exit program
+- Save Output   : save current view as CSV, ROOT canvas, PDF, or PNG
 - Redraw        : redraw view
 - Reset Zoom    : reset autoscale
 
